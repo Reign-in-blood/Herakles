@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Herakles</title>
+  <desc id="desc">Monogramme H inspiré d'une colonne grecque.</desc>
+  <rect width="512" height="512" rx="96" fill="#12110f"/>
+  <path d="M132 112h248v40H132zm24 60h44v168h-44zm156 0h44v168h-44zM200 236h112v40H200zM132 360h248v40H132z" fill="#e1c58c"/>
+  <path d="M112 92h288v12H112zm0 316h288v12H112z" fill="#6f5a36"/>
+</svg>
