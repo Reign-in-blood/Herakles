@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://reign-in-blood.github.io/Herakles/data/schema/session.schema.json",
+  "title": "Herakles workout session",
+  "type": "object",
+  "required": ["schema_version", "id", "started_at", "duration_seconds", "exercises"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "id": { "type": "string", "minLength": 1 },
+    "started_at": { "type": "string", "format": "date-time" },
+    "ended_at": { "type": ["string", "null"], "format": "date-time" },
+    "duration_seconds": { "type": "integer", "minimum": 0 },
+    "user_snapshot": { "$ref": "#/$defs/userSnapshot" },
+    "exercises": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          { "$ref": "#/$defs/strengthExercise" },
+          { "$ref": "#/$defs/cardioExercise" }
+        ]
+      }
+    },
+    "summary": { "$ref": "#/$defs/sessionSummary" },
+    "notes": { "type": "string" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "userSnapshot": {
+      "type": "object",
+      "properties": {
+        "weight_kg": { "type": ["number", "null"], "exclusiveMinimum": 0 },
+        "height_cm": { "type": ["number", "null"], "exclusiveMinimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "equipment": {
+      "type": "object",
+      "required": ["type", "name"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["machine", "cable", "barbell", "dumbbell", "bodyweight", "cardio_machine", "other"]
+        },
+        "name": { "type": "string" },
+        "brand": { "type": ["string", "null"] },
+        "model": { "type": ["string", "null"] },
+        "machine_base_resistance_kg": { "type": ["number", "null"], "minimum": 0 },
+        "settings": {
+          "type": "object",
+          "additionalProperties": { "type": ["string", "number", "boolean", "null"] }
+        }
+      },
+      "additionalProperties": false
+    },
+    "loadDetails": {
+      "type": "object",
+      "properties": {
+        "plates_per_side_kg": { "type": ["number", "null"], "minimum": 0 },
+        "plates_total_kg": { "type": ["number", "null"], "minimum": 0 },
+        "selected_stack_kg": { "type": ["number", "null"], "minimum": 0 },
+        "body_weight_kg": { "type": ["number", "null"], "exclusiveMinimum": 0 },
+        "assistance_kg": { "type": ["number", "null"], "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "strengthSet": {
+      "type": "object",
+      "required": ["set_number", "reps", "load_kg"],
+      "properties": {
+        "set_number": { "type": "integer", "minimum": 1 },
+        "reps": { "type": "integer", "minimum": 0 },
+        "load_kg": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Charge nominale utilisée pour calculer le volume de cette série."
+        },
+        "load_details": { "$ref": "#/$defs/loadDetails" },
+        "rest_target_seconds": { "type": ["integer", "null"], "minimum": 0 },
+        "rest_actual_seconds": { "type": ["integer", "null"], "minimum": 0 },
+        "rpe": { "type": ["number", "null"], "minimum": 1, "maximum": 10 },
+        "pain": {
+          "type": ["object", "null"],
+          "properties": {
+            "location": { "type": "string" },
+            "intensity_0_10": { "type": "number", "minimum": 0, "maximum": 10 },
+            "notes": { "type": "string" }
+          },
+          "required": ["location", "intensity_0_10"],
+          "additionalProperties": false
+        },
+        "notes": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "strengthExercise": {
+      "type": "object",
+      "required": ["id", "type", "name", "sets"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "type": { "const": "strength" },
+        "name": { "type": "string", "minLength": 1 },
+        "equipment": { "$ref": "#/$defs/equipment" },
+        "sets": { "type": "array", "items": { "$ref": "#/$defs/strengthSet" } },
+        "exercise_volume_kg": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Cache calculable : somme de reps × load_kg."
+        },
+        "notes": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "cardioExercise": {
+      "type": "object",
+      "required": ["id", "type", "name", "duration_seconds"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "type": { "const": "cardio" },
+        "name": { "type": "string", "minLength": 1 },
+        "equipment": { "$ref": "#/$defs/equipment" },
+        "duration_seconds": { "type": "integer", "minimum": 0 },
+        "distance_km": { "type": ["number", "null"], "minimum": 0 },
+        "elevation_gain_m": { "type": ["number", "null"], "minimum": 0 },
+        "avg_speed_kmh": { "type": ["number", "null"], "minimum": 0 },
+        "avg_pace_seconds_per_km": { "type": ["number", "null"], "minimum": 0 },
+        "avg_incline_percent": { "type": ["number", "null"], "minimum": 0 },
+        "max_incline_percent": { "type": ["number", "null"], "minimum": 0 },
+        "notes": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "sessionSummary": {
+      "type": "object",
+      "properties": {
+        "strength_volume_kg": { "type": ["number", "null"], "minimum": 0 },
+        "strength_reps": { "type": ["integer", "null"], "minimum": 0 },
+        "strength_sets": { "type": ["integer", "null"], "minimum": 0 },
+        "exercise_count": { "type": ["integer", "null"], "minimum": 0 }
+      },
+      "additionalProperties": false
+    }
+  }
+}
