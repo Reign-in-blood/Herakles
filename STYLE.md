@@ -16,14 +16,40 @@ Herakles doit évoquer la Grèce antique de manière sobre et fonctionnelle.
 
 - interface **mobile-first** ;
 - fond sombre par défaut et contrastes nets ;
-- accents bronze, pierre, ivoire et métal vieilli ;
+- palette minérale : charbon, anthracite, pierre, ivoire et bronze discret ;
 - surfaces sombres légèrement différenciées plutôt que de nombreuses couleurs ;
 - cadres, séparateurs et détails géométriques pouvant rappeler l'architecture ou les frises grecques ;
 - éléments antiques utilisés comme accents, jamais comme bruit visuel ;
 - gros boutons et zones tactiles ;
 - hiérarchie très claire entre exercice, charge, répétitions et chronomètre ;
 - aucune animation gênante pendant une série ou un chrono ;
-- éviter l'esthétique « application fitness néon » au profit d'un rendu plus minéral, bronze et intemporel.
+- éviter l'esthétique « application fitness néon » au profit d'un rendu minéral, sobre et intemporel.
+
+## Palette officielle
+
+Cette palette est la référence du projet. Ne pas remplacer ces couleurs par des variantes approximatives sans décision explicite.
+
+| Variable | Rôle | Couleur | Hex |
+| --- | --- | --- | --- |
+| `--color1` | Fond général | Noir charbon | `#0B0D0D` |
+| `--color2` | Fond secondaire | Anthracite | `#111414` |
+| `--color3` | Cartes | Charbon clair | `#171A19` |
+| `--color4` | Cartes surélevées | Gris pierre sombre | `#1D201F` |
+| `--color5` | Bordures | Gris graphite | `#343735` |
+| `--color6` | Bordures discrètes | Gris profond | `#292C2B` |
+| `--color7` | Texte principal | Ivoire clair | `#F3EFE5` |
+| `--color8` | Texte secondaire | Gris chaud | `#B9B6AD` |
+| `--color9` | Texte atténué | Gris pierre | `#858780` |
+| `--color10` | Accent principal | Pierre / ivoire | `#DDD2BC` |
+| `--color11` | Accent clair | Pierre claire | `#EAE0CD` |
+| `--color12` | Accent sombre | Bronze pierre | `#A38A68` |
+| `--color13` | Bronze discret | Bronze antique | `#806A4D` |
+| `--color14` | Succès | Vert doux | `#78A875` |
+| `--color15` | Succès background | Vert très sombre | `#162319` |
+| `--color16` | Erreur | Rouge doux | `#C96C67` |
+| `--color17` | Erreur background | Rouge très sombre | `#291716` |
+| `--color18` | Attention | Ambre pierre | `#C9A76B` |
+| `--color19` | Information | Bleu gris | `#7D9AA0` |
 
 ## Convention CSS
 
@@ -33,18 +59,30 @@ Le CSS doit rester simple à lire et à modifier directement, sans couche d'abst
 
 Centraliser les valeurs globales dans `:root` et utiliser `var(...)` dans les composants.
 
-Le projet privilégie volontairement une convention courte pour la palette :
-
 ```css
 :root {
-  --color1: #12110f; /* fond principal */
-  --color2: #1b1916; /* surface */
-  --color3: #24211d; /* surface renforcée */
-  --color4: #f4efe5; /* texte principal / ivoire */
-  --color5: #aaa193; /* texte secondaire */
-  --color6: #3a342d; /* bordures / séparateurs */
-  --color7: #c2a46d; /* bronze principal */
-  --color8: #e1c58c; /* bronze clair / accent fort */
+  color-scheme: dark;
+
+  --color1: #0B0D0D; /* fond général */
+  --color2: #111414; /* fond secondaire */
+  --color3: #171A19; /* cartes */
+  --color4: #1D201F; /* cartes surélevées */
+  --color5: #343735; /* bordures */
+  --color6: #292C2B; /* bordures discrètes */
+  --color7: #F3EFE5; /* texte principal */
+  --color8: #B9B6AD; /* texte secondaire */
+  --color9: #858780; /* texte atténué */
+  --color10: #DDD2BC; /* accent principal */
+  --color11: #EAE0CD; /* accent clair */
+  --color12: #A38A68; /* accent sombre */
+  --color13: #806A4D; /* bronze discret */
+
+  --color14: #78A875; /* succès */
+  --color15: #162319; /* succès background */
+  --color16: #C96C67; /* erreur */
+  --color17: #291716; /* erreur background */
+  --color18: #C9A76B; /* attention */
+  --color19: #7D9AA0; /* information */
 
   --radius1: 18px;
   --radius2: 999px;
@@ -65,14 +103,20 @@ Exemple :
 
 ```css
 .card {
-  color: var(--color4);
-  background: var(--color2);
-  border: 1px solid var(--color6);
+  color: var(--color7);
+  background: var(--color3);
+  border: 1px solid var(--color5);
   border-radius: var(--radius1);
 }
 ```
 
-La palette pourra être ajustée à mesure que les maquettes de `assets/models/` sont affinées, mais la logique `:root` + `var(...)` reste la base du développement visuel.
+## Usage des états
+
+- succès : `--color14` sur `--color15` ;
+- erreur : `--color16` sur `--color17` ;
+- attention : `--color18` ;
+- information : `--color19` ;
+- ne pas utiliser les couleurs d'état comme décoration générale.
 
 ## Écrans d'entraînement
 
