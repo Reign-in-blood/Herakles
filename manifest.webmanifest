@@ -1,0 +1,19 @@
+{
+  "name": "Herakles",
+  "short_name": "Herakles",
+  "description": "Suivi d'entraînement local-first, installable et utilisable hors ligne.",
+  "lang": "fr-FR",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#12110f",
+  "theme_color": "#12110f",
+  "icons": [
+    {
+      "src": "./assets/icons/herakles.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
