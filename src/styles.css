@@ -1,17 +1,24 @@
 :root {
   color-scheme: dark;
-  --bg: #12110f;
-  --surface: #1b1916;
-  --surface-strong: #24211d;
-  --text: #f4efe5;
-  --muted: #aaa193;
-  --line: #3a342d;
-  --accent: #c2a46d;
-  --accent-strong: #e1c58c;
-  --radius: 18px;
+
+  --color1: #12110f; /* fond principal */
+  --color2: #1b1916; /* surface */
+  --color3: #24211d; /* surface renforcée */
+  --color4: #f4efe5; /* texte principal / ivoire */
+  --color5: #aaa193; /* texte secondaire */
+  --color6: #3a342d; /* bordures / séparateurs */
+  --color7: #c2a46d; /* bronze principal */
+  --color8: #e1c58c; /* bronze clair / accent fort */
+  --color9: rgba(194, 164, 109, 0.06); /* halo bronze discret */
+
+  --radius1: 18px;
+  --radius2: 999px;
+  --tap-size: 44px;
+  --content-width: 760px;
+
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: var(--bg);
-  color: var(--text);
+  background: var(--color1);
+  color: var(--color4);
 }
 
 * {
@@ -22,8 +29,8 @@ body {
   margin: 0;
   min-height: 100vh;
   background:
-    linear-gradient(180deg, rgba(194, 164, 109, 0.06), transparent 26rem),
-    var(--bg);
+    linear-gradient(180deg, var(--color9), transparent 26rem),
+    var(--color1);
 }
 
 button,
@@ -34,13 +41,13 @@ textarea {
 }
 
 button {
-  min-height: 44px;
+  min-height: var(--tap-size);
 }
 
 .app-header,
 .app-footer,
 .shell {
-  width: min(100% - 32px, 760px);
+  width: min(100% - 32px, var(--content-width));
   margin-inline: auto;
 }
 
@@ -50,7 +57,7 @@ button {
   justify-content: space-between;
   gap: 16px;
   padding: 24px 0 16px;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid var(--color6);
 }
 
 h1,
@@ -72,13 +79,13 @@ h2 {
 }
 
 p {
-  color: var(--muted);
+  color: var(--color5);
   line-height: 1.55;
 }
 
 .eyebrow,
 .card-label {
-  color: var(--accent-strong);
+  color: var(--color8);
   font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.14em;
@@ -115,9 +122,9 @@ p {
   gap: 8px;
   min-height: 136px;
   padding: 18px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--surface);
+  border: 1px solid var(--color6);
+  border-radius: var(--radius1);
+  background: var(--color2);
 }
 
 .card strong {
@@ -125,12 +132,12 @@ p {
 }
 
 .card small {
-  color: var(--muted);
+  color: var(--color5);
 }
 
 .card-wide {
   min-height: 0;
-  background: var(--surface-strong);
+  background: var(--color3);
 }
 
 .card-wide p {
@@ -138,20 +145,20 @@ p {
 }
 
 .button {
-  border: 1px solid var(--line);
-  border-radius: 999px;
+  border: 1px solid var(--color6);
+  border-radius: var(--radius2);
   padding: 10px 16px;
   cursor: pointer;
 }
 
 .button-secondary {
   background: transparent;
-  color: var(--text);
+  color: var(--color4);
 }
 
 .button-secondary:hover,
 .button-secondary:focus-visible {
-  border-color: var(--accent);
+  border-color: var(--color7);
 }
 
 .app-footer {
@@ -159,8 +166,8 @@ p {
   justify-content: space-between;
   gap: 16px;
   padding: 18px 0 max(24px, env(safe-area-inset-bottom));
-  border-top: 1px solid var(--line);
-  color: var(--muted);
+  border-top: 1px solid var(--color6);
+  color: var(--color5);
   font-size: 0.8rem;
 }
 
