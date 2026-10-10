@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "id": "demo-session-0001",
+  "started_at": "2026-01-15T18:00:00+01:00",
+  "ended_at": "2026-01-15T18:40:00+01:00",
+  "duration_seconds": 2400,
+  "user_snapshot": {
+    "weight_kg": 75,
+    "height_cm": 175
+  },
+  "exercises": [
+    {
+      "id": "demo-cardio-0001",
+      "type": "cardio",
+      "name": "Marche inclinée",
+      "equipment": {
+        "type": "cardio_machine",
+        "name": "Tapis de course",
+        "brand": null,
+        "model": null,
+        "machine_base_resistance_kg": null,
+        "settings": {}
+      },
+      "duration_seconds": 1200,
+      "distance_km": 1.5,
+      "elevation_gain_m": 80,
+      "avg_speed_kmh": 4.5,
+      "avg_pace_seconds_per_km": 800,
+      "avg_incline_percent": 6,
+      "max_incline_percent": 10,
+      "notes": "Exemple fictif destiné à documenter le format."
+    },
+    {
+      "id": "demo-strength-0001",
+      "type": "strength",
+      "name": "V-Squat",
+      "equipment": {
+        "type": "machine",
+        "name": "V-Squat de démonstration",
+        "brand": "Demo",
+        "model": null,
+        "machine_base_resistance_kg": 20,
+        "settings": {}
+      },
+      "sets": [
+        {
+          "set_number": 1,
+          "reps": 10,
+          "load_kg": 50,
+          "load_details": {
+            "plates_per_side_kg": 15,
+            "plates_total_kg": 30,
+            "selected_stack_kg": null,
+            "body_weight_kg": 75,
+            "assistance_kg": null
+          },
+          "rest_target_seconds": 120,
+          "rest_actual_seconds": 122,
+          "rpe": 6,
+          "pain": null,
+          "notes": ""
+        },
+        {
+          "set_number": 2,
+          "reps": 10,
+          "load_kg": 50,
+          "load_details": {
+            "plates_per_side_kg": 15,
+            "plates_total_kg": 30,
+            "selected_stack_kg": null,
+            "body_weight_kg": 75,
+            "assistance_kg": null
+          },
+          "rest_target_seconds": 120,
+          "rest_actual_seconds": 119,
+          "rpe": 7,
+          "pain": null,
+          "notes": ""
+        },
+        {
+          "set_number": 3,
+          "reps": 10,
+          "load_kg": 50,
+          "load_details": {
+            "plates_per_side_kg": 15,
+            "plates_total_kg": 30,
+            "selected_stack_kg": null,
+            "body_weight_kg": 75,
+            "assistance_kg": null
+          },
+          "rest_target_seconds": 120,
+          "rest_actual_seconds": 121,
+          "rpe": 8,
+          "pain": null,
+          "notes": ""
+        }
+      ],
+      "exercise_volume_kg": 1500,
+      "notes": "Exemple fictif."
+    }
+  ],
+  "summary": {
+    "strength_volume_kg": 1500,
+    "strength_reps": 30,
+    "strength_sets": 3,
+    "exercise_count": 2
+  },
+  "notes": "Toutes les valeurs de ce fichier sont fictives."
+}
