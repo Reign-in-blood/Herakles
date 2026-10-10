@@ -6,6 +6,46 @@ Ce fichier est la référence de travail pour tout agent ou contributeur automat
 
 Avant toute lecture approfondie, modification, création de fichier, commit ou PR : **lire `AGENTS.md` en premier** et respecter ses règles.
 
+## Contexte utilisateur
+
+Le propriétaire du projet possède :
+
+- un bon niveau en **HTML** ;
+- un bon niveau en **CSS** ;
+- des bases en **JavaScript**.
+
+Adapter les explications en conséquence : ne pas sur-expliquer HTML/CSS, mais expliquer clairement les choix JavaScript, les APIs navigateur, IndexedDB, PWA, service workers et tout outillage nouveau lorsqu'ils apparaissent.
+
+Après **chaque action effectuée sur le dépôt distant**, fournir au propriétaire les commandes Git simples nécessaires pour récupérer proprement les changements en local. Privilégier des commandes courtes, copiables telles quelles.
+
+## Workflow Git obligatoire
+
+- **Ne jamais travailler directement sur `master`.**
+- La branche de travail principale est **`develop`**.
+- Toute modification effectuée par un agent doit être commitée sur `develop`, ou sur une branche de fonctionnalité créée depuis `develop` si cela devient nécessaire.
+- `master` est réservé aux versions stables / publiées et ne doit recevoir des changements que par fusion volontaire depuis `develop`.
+- Avant d'écrire dans le dépôt, vérifier la branche ciblée.
+- Ne jamais utiliser `git push --force` sur `master` ou `develop`.
+- Pour une petite évolution normale, préférer un commit directement sur `develop` plutôt que de multiplier inutilement les branches.
+
+### Commandes à communiquer après une modification sur `develop`
+
+Si `develop` existe déjà en local :
+
+```bash
+git switch develop
+git pull origin develop
+```
+
+Si c'est la première récupération de `develop` sur la machine :
+
+```bash
+git fetch origin
+git switch --track origin/develop
+```
+
+Si une branche de fonctionnalité est utilisée, donner explicitement les commandes adaptées à cette branche et indiquer ensuite comment revenir sur `develop`.
+
 ## Objectif produit
 
 Herakles est une application personnelle de suivi d'entraînement, pensée d'abord pour être :
