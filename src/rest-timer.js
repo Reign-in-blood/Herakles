@@ -136,7 +136,31 @@ export function initRestTimer() {
   const ringCircumference = 2 * Math.PI * ringRadius;
   ringProgress.style.strokeDasharray = `${ringCircumference}`;
 
+  let wakeLock = null;
   let state = loadState();
+
+  async function acquireWakeLock() {
+    if (state.status !== "running" || state.alarmTriggered || document.visibilityState !== "visible" || wakeLock || !("wakeLock" in navigator)) return;
+    try {
+      const lock = await navigator.wakeLock.request("screen");
+      if (state.status !== "running" || state.alarmTriggered || document.visibilityState !== "visible") {
+        await lock.release();
+        return;
+      }
+      wakeLock = lock;
+      lock.addEventListener("release", () => {
+        if (wakeLock === lock) wakeLock = null;
+      });
+    } catch (error) {
+      console.warn("Screen wake lock unavailable", error);
+    }
+  }
+
+  function releaseWakeLock() {
+    const lock = wakeLock;
+    wakeLock = null;
+    if (lock) void lock.release().catch(() => {});
+  }
   let lastRenderedSecond = null;
   let lastRenderedMode = null;
 
@@ -218,6 +242,7 @@ export function initRestTimer() {
     if (state.status === "running" && timing.isOvertime && !state.alarmTriggered) {
       state.alarmTriggered = true;
       saveState(state);
+      releaseWakeLock();
       triggerAlarm();
     }
   }
@@ -232,6 +257,7 @@ export function initRestTimer() {
     state.alarmTriggered = false;
     state.lastActualSeconds = null;
     saveState(state);
+    void acquireWakeLock();
     render(true);
   }
 
@@ -241,6 +267,7 @@ export function initRestTimer() {
       return;
     }
 
+    releaseWakeLock();
     state.lastActualSeconds = Math.max(0, Math.floor((Date.now() - state.startedAt) / 1000));
     state.status = "idle";
     state.startedAt = null;
@@ -270,6 +297,7 @@ export function initRestTimer() {
   }
 
   function resetTimer() {
+    releaseWakeLock();
     state = createDefaultState();
     saveState(state);
     render(true);
@@ -296,11 +324,18 @@ export function initRestTimer() {
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") {
       render(true);
+      void acquireWakeLock();
+    } else {
+      releaseWakeLock();
     }
   });
 
-  window.addEventListener("pageshow", () => render(true));
+  window.addEventListener("pageshow", () => {
+    render(true);
+    void acquireWakeLock();
+  });
 
   render(true);
+  void acquireWakeLock();
   window.setInterval(render, TICK_RATE_MS);
 }
