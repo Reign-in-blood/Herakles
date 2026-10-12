@@ -66,7 +66,9 @@ Le cheminement principal doit rester le suivant :
 ```text
 Créer / commencer une séance
         ↓
-Choisir un exercice
+Choisir un thème / groupe (dos, jambes, bras, etc.)
+        ↓
+Choisir un exercice dans ce thème
         ↓
 Configurer puis réaliser ses séries ou son cardio
         ↓
@@ -74,23 +76,26 @@ Récapitulatif de l'exercice
         ↓
 Enregistrer l'exercice dans la séance active
         ↓
-Choisir un autre exercice et recommencer si nécessaire
+Revenir directement à la liste des exercices du même thème
         ↓
-Terminer la séance
+Ajouter un autre exercice du thème, ou Terminer la séance
         ↓
 Récapitulatif global de la séance
         ↓
-Enregistrer la séance complète
+Enregistrer et clôturer la séance complète
 ```
 
 Règles importantes :
 
 - une **séance** est le conteneur global ;
 - une séance contient **un ou plusieurs exercices réalisés successivement** ;
+- le thème/groupe est choisi au début de la séance et reste le contexte de sélection des exercices jusqu'à la fin de cette séance ;
+- après validation du récapitulatif d'un exercice, **ne pas revenir au choix des groupes** : revenir à la liste des exercices du thème actif ;
+- depuis cette liste, l'utilisateur peut soit lancer un autre exercice, soit **Terminer la séance** ;
 - terminer un exercice **ne termine pas la séance** ;
 - le chrono global de séance commence au démarrage de la séance et continue entre les exercices et pendant les récupérations ;
 - chaque exercice possède aussi son propre début, sa propre fin et sa propre durée ;
-- le bouton d'enregistrement du récapitulatif d'exercice ajoute l'exercice à la séance active puis revient au choix des exercices ;
+- le bouton d'enregistrement du récapitulatif d'exercice ajoute l'exercice à la séance active puis revient au choix des exercices du thème actif ;
 - seul le flux explicite **Terminer la séance** clôt la séance et déclenche son récapitulatif global ;
 - les agrégats de séance (répétitions, volume, durée, calories estimées, nombre d'exercices) doivent être calculables depuis les exercices enregistrés.
 
@@ -117,6 +122,7 @@ Priorité à une architecture minimale, statique et durable :
 - `src/styles.css` : styles globaux ;
 - `src/session.css` : styles spécifiques au suivi de séance ;
 - `src/app.js` : navigation et logique principale ;
+- `src/session-flow.js` : maintien du thème actif, fin de séance et récapitulatif global ;
 - `src/exercises.js` : catalogue et catégories d'exercices ;
 - `src/rest-timer.js` : chronomètre de récupération ;
 - `src/notifications.js` : notifications liées au repos ;
@@ -148,6 +154,7 @@ Le JSON est le format d'échange canonique. IndexedDB est le stockage applicatif
 Une séance contient au minimum :
 
 - identifiant unique ;
+- thème/groupe actif lorsque cette information est pertinente pour le flux (`theme_id`) ;
 - date/heure de début et de fin ;
 - durée globale ;
 - snapshot optionnel des mensurations (`weight_kg`, `height_cm`) ;
@@ -166,6 +173,12 @@ Chaque exercice enregistré dans une séance contient au minimum :
 Pour la musculation, les données brutes comprennent notamment les séries, répétitions, charges et repos. Pour le cardio, elles comprennent notamment durée, distance, vitesse/allure et inclinaison lorsqu'elles sont disponibles.
 
 Les valeurs calculées comme `volume_kg`, `exercise_volume_kg` ou `session_volume_kg` peuvent être mises en cache, mais doivent toujours pouvoir être recalculées à partir des données brutes.
+
+### Versionnement actuel des séances
+
+- `data/schema/session.schema.json` conserve le format historique v1 ;
+- `data/schema/session-v2.schema.json` décrit le format multi-exercices utilisé par le nouveau flux de séance ;
+- ne jamais réécrire silencieusement les anciennes séances v1 ; toute lecture historique doit accepter les versions encore supportées ou appliquer une migration explicite.
 
 ### Calories estimées
 
