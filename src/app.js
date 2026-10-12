@@ -6,7 +6,8 @@ const storageStatus = document.querySelector("#storage-status");
 const sessionCount = document.querySelector("#session-count");
 const networkStatus = document.querySelector("#network-status");
 const installButton = document.querySelector("#install-button");
-const checkUpdateButton = document.querySelector("#check-update-button");
+const updateDialog = document.querySelector("#update-dialog");
+const postponeUpdateButton = document.querySelector("#postpone-update-button");
 const applyUpdateButton = document.querySelector("#apply-update-button");
 const updateStatus = document.querySelector("#update-status");
 
@@ -14,6 +15,8 @@ let deferredInstallPrompt = null;
 let serviceWorkerRegistration = null;
 let waitingServiceWorker = null;
 let reloadingForUpdate = false;
+let postponedWorker = null;
+let previousFocus = null;
 
 async function initStorage() {
   try {
@@ -34,10 +37,22 @@ function updateNetworkStatus() {
   networkStatus.textContent = navigator.onLine ? "En ligne" : "Hors ligne";
 }
 
+function closeUpdateDialog() {
+  updateDialog.hidden = true;
+  document.body.classList.remove("update-dialog-open");
+  previousFocus?.focus?.();
+}
+
 function showAvailableUpdate(worker) {
   waitingServiceWorker = worker;
-  updateStatus.textContent = "Une nouvelle version de Herakles est prête à être installée.";
-  applyUpdateButton.hidden = false;
+  if (postponedWorker === worker || !updateDialog.hidden) return;
+  previousFocus = document.activeElement;
+  updateStatus.textContent = "";
+  applyUpdateButton.disabled = false;
+  applyUpdateButton.textContent = "Installer";
+  updateDialog.hidden = false;
+  document.body.classList.add("update-dialog-open");
+  postponeUpdateButton.focus();
 }
 
 function watchInstallingWorker(worker) {
@@ -48,53 +63,22 @@ function watchInstallingWorker(worker) {
   });
 }
 
-async function checkForUpdate({ manual = false } = {}) {
-  if (!serviceWorkerRegistration) {
-    if (manual) {
-      updateStatus.textContent = "Le service worker n’est pas encore prêt.";
-    }
+async function checkForUpdate() {
+  if (!serviceWorkerRegistration || !navigator.onLine) return;
+  if (serviceWorkerRegistration.waiting) {
+    showAvailableUpdate(serviceWorkerRegistration.waiting);
     return;
   }
-
-  if (!navigator.onLine) {
-    updateStatus.textContent = "Impossible de rechercher une mise à jour hors ligne.";
-    return;
-  }
-
-  if (waitingServiceWorker || serviceWorkerRegistration.waiting) {
-    showAvailableUpdate(waitingServiceWorker || serviceWorkerRegistration.waiting);
-    return;
-  }
-
-  if (manual) {
-    checkUpdateButton.disabled = true;
-    checkUpdateButton.textContent = "Recherche…";
-    updateStatus.textContent = "Recherche d’une nouvelle version…";
-  }
-
   try {
     await serviceWorkerRegistration.update();
-
-    if (serviceWorkerRegistration.waiting) {
-      showAvailableUpdate(serviceWorkerRegistration.waiting);
-    } else if (manual) {
-      updateStatus.textContent = "Herakles est à jour.";
-    }
+    if (serviceWorkerRegistration.waiting) showAvailableUpdate(serviceWorkerRegistration.waiting);
   } catch (error) {
-    console.error("Service worker update check failed", error);
-    updateStatus.textContent = "La recherche de mise à jour a échoué.";
-  } finally {
-    if (manual) {
-      checkUpdateButton.disabled = false;
-      checkUpdateButton.textContent = "Rechercher une mise à jour";
-    }
+    console.warn("Service worker update check failed", error);
   }
 }
 
 async function registerServiceWorker() {
   if (!("serviceWorker" in navigator)) {
-    updateStatus.textContent = "Les service workers ne sont pas pris en charge par ce navigateur.";
-    checkUpdateButton.disabled = true;
     return;
   }
 
@@ -115,32 +99,47 @@ async function registerServiceWorker() {
       }
     });
 
-    if (!serviceWorkerRegistration.waiting) {
-      updateStatus.textContent = "Herakles est à jour.";
-    }
-
     await checkForUpdate();
   } catch (error) {
     console.error("Service worker registration failed", error);
-    updateStatus.textContent = "Impossible d’activer le mode PWA.";
+
   }
 }
 
-checkUpdateButton.addEventListener("click", () => {
-  void checkForUpdate({ manual: true });
+postponeUpdateButton.addEventListener("click", () => {
+  postponedWorker = waitingServiceWorker || serviceWorkerRegistration?.waiting;
+  closeUpdateDialog();
+});
+
+updateDialog.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    event.preventDefault();
+    postponeUpdateButton.click();
+  }
+  if (event.key === "Tab") {
+    const buttons = [postponeUpdateButton, applyUpdateButton];
+    const current = buttons.indexOf(document.activeElement);
+    if (event.shiftKey && current === 0) {
+      event.preventDefault();
+      applyUpdateButton.focus();
+    } else if (!event.shiftKey && current === 1) {
+      event.preventDefault();
+      postponeUpdateButton.focus();
+    }
+  }
 });
 
 applyUpdateButton.addEventListener("click", () => {
   const worker = waitingServiceWorker || serviceWorkerRegistration?.waiting;
 
   if (!worker) {
-    updateStatus.textContent = "Aucune mise à jour n’est prête à être installée.";
-    applyUpdateButton.hidden = true;
+    closeUpdateDialog();
     return;
   }
 
   applyUpdateButton.disabled = true;
   applyUpdateButton.textContent = "Installation…";
+  postponeUpdateButton.disabled = true;
   updateStatus.textContent = "Installation de la nouvelle version…";
   worker.postMessage({ type: "SKIP_WAITING" });
 });
