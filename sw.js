@@ -1,4 +1,4 @@
-const CACHE_NAME = "herakles-shell-v15";
+const CACHE_NAME = "herakles-shell-v16";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -6,6 +6,7 @@ const APP_SHELL = [
   "./src/styles.css",
   "./src/session.css",
   "./src/app.js",
+  "./src/session-flow.js",
   "./src/exercises.js",
   "./src/notifications.js",
   "./src/rest-timer.js",
