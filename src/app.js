@@ -1,5 +1,6 @@
 import { countSessions, openDatabase } from "./storage.js";
 import { initNotificationControls } from "./notifications.js";
+import { CATEGORIES, EXERCISES, RESISTANCE_LABELS } from "./exercises.js";
 import { initRestTimer } from "./rest-timer.js";
 
 const storageStatus = document.querySelector("#storage-status");
@@ -191,6 +192,7 @@ document.addEventListener("visibilitychange", () => {
 
 function initHome() {
   const home = document.querySelector("#home-screen");
+  const flow = document.querySelector("#exercise-flow");
   const timer = document.querySelector("#rest-timer");
   const system = document.querySelector("#system-panel");
   const back = document.querySelector("#back-home-button");
@@ -229,6 +231,7 @@ function initHome() {
   }));
   function showScreen(screen) {
     home.hidden = screen !== "home";
+    flow.hidden = screen !== "exercise";
     timer.hidden = screen !== "timer";
     system.hidden = screen !== "settings";
     back.hidden = screen === "home";
@@ -238,10 +241,100 @@ function initHome() {
     if (screen === "settings") navSettings.setAttribute("aria-current","page"); else navSettings.removeAttribute("aria-current");
     window.scrollTo(0,0);
   }
-  document.querySelector("#start-workout-button").addEventListener("click", () => showScreen("timer"));
-  back.addEventListener("click", () => showScreen("home"));
+  document.querySelector("#start-workout-button").addEventListener("click", () => { resetExerciseFlow(); showScreen("exercise"); });
+  back.addEventListener("click", () => {
+    if (!flow.hidden && exerciseStep === "config") { showExerciseList(); return; }
+    if (!flow.hidden && exerciseStep === "list") { showCategories(); return; }
+    showScreen("home");
+  });
   navHome.addEventListener("click", () => showScreen("home"));
   navSettings.addEventListener("click", () => showScreen("settings"));
+
+  let exerciseStep = "categories";
+  let currentCategory = null;
+  let selectedExercise = null;
+  const categoryList = document.querySelector("#category-list");
+  const exerciseList = document.querySelector("#exercise-list");
+  const freeButton = document.querySelector("#free-exercise-button");
+  const config = document.querySelector("#exercise-config");
+  const flowTitle = document.querySelector("#exercise-flow-title");
+  const flowIntro = document.querySelector("#exercise-flow-intro");
+  const flowMessage = document.querySelector("#exercise-flow-message");
+  function showCategories() {
+    exerciseStep = "categories";
+    flowTitle.textContent = "Choisir une catégorie";
+    flowIntro.textContent = "Sélectionne une zone à travailler aujourd’hui.";
+    categoryList.hidden = false; exerciseList.hidden = true; config.hidden = true; freeButton.hidden = true;
+    flowMessage.textContent = "";
+    categoryList.replaceChildren();
+    CATEGORIES.forEach(category => {
+      const button = document.createElement("button"); button.type = "button"; button.className = "exercise-choice category-choice";
+      const symbol = document.createElement("span"); symbol.className = "choice-visual"; symbol.textContent = category.symbol;
+      const title = document.createElement("strong"); title.textContent = category.name;
+      const arrow = document.createElement("span"); arrow.className = "choice-arrow"; arrow.textContent = "›";
+      button.append(symbol,title,arrow);
+      button.addEventListener("click", () => { currentCategory = category.id; showExerciseList(); });
+      categoryList.append(button);
+    });
+  }
+  function showExerciseList() {
+    exerciseStep = "list";
+    const category = CATEGORIES.find(item => item.id === currentCategory);
+    flowTitle.textContent = category?.name || "Exercices";
+    flowIntro.textContent = "Choisis ton premier exercice.";
+    categoryList.hidden = true; exerciseList.hidden = false; config.hidden = true; freeButton.hidden = false;
+    flowMessage.textContent = "";
+    exerciseList.replaceChildren();
+    const items = currentCategory === "libre" ? EXERCISES : EXERCISES.filter(item => item.categories.includes(currentCategory));
+    items.forEach(exercise => {
+      const button = document.createElement("button"); button.type = "button"; button.className = "exercise-choice";
+      const visual = document.createElement("span"); visual.className = "choice-visual"; visual.textContent = exercise.type === "cardio" ? "◷" : "Η";
+      const details = document.createElement("span"); details.className = "choice-details";
+      const name = document.createElement("strong"); name.textContent = exercise.name;
+      const muscles = document.createElement("small"); muscles.textContent = exercise.primary.join(" · ");
+      const type = document.createElement("small"); type.textContent = exercise.type === "cardio" ? "Cardio" : RESISTANCE_LABELS[exercise.resistance];
+      details.append(name,muscles,type);
+      const arrow = document.createElement("span"); arrow.className = "choice-arrow"; arrow.textContent = "›";
+      button.append(visual,details,arrow);
+      button.addEventListener("click", () => showExerciseConfig(exercise));
+      exerciseList.append(button);
+    });
+  }
+  function showExerciseConfig(exercise) {
+    exerciseStep = "config"; selectedExercise = exercise;
+    flowTitle.textContent = "Configurer l’exercice";
+    flowIntro.textContent = "Ces valeurs sont des objectifs modifiables pendant la séance.";
+    categoryList.hidden = true; exerciseList.hidden = true; config.hidden = false; freeButton.hidden = true;
+    document.querySelector("#selected-exercise-name").textContent = exercise.name;
+    document.querySelector("#selected-exercise-muscles").textContent = [...exercise.primary,...exercise.secondary].join(" · ");
+    document.querySelector("#strength-fields").hidden = exercise.type === "cardio";
+    document.querySelector("#cardio-fields").hidden = exercise.type !== "cardio";
+    document.querySelectorAll("#strength-fields input").forEach(input => { input.disabled = exercise.type === "cardio"; });
+    document.querySelectorAll("#cardio-fields input").forEach(input => { input.disabled = exercise.type !== "cardio"; });
+    flowMessage.textContent = "";
+  }
+  function resetExerciseFlow() { currentCategory = null; selectedExercise = null; showCategories(); }
+  freeButton.addEventListener("click", () => {
+    const name = window.prompt("Nom de l’exercice libre :");
+    if (!name?.trim()) return;
+    const cardio = window.confirm("S’agit-il d’un exercice cardio ? (OK = cardio, Annuler = musculation)");
+    showExerciseConfig({ id: `custom-${Date.now()}`, name: name.trim().slice(0,80), primary: ["Personnalisé"], secondary: [], type: cardio ? "cardio" : "strength", resistance: "free_weight", custom: true });
+  });
+  config.addEventListener("submit", event => {
+    event.preventDefault();
+    if (!selectedExercise || !config.reportValidity()) return;
+    const cardio = selectedExercise.type === "cardio";
+    const number = id => { const value = document.querySelector(id).value; return value === "" ? null : Number(value); };
+    const draft = {
+      schema_version: 1, started_at: new Date().toISOString(),
+      exercise: { id: selectedExercise.id, name: selectedExercise.name, type: selectedExercise.type, resistance: selectedExercise.resistance, primary_muscles: selectedExercise.primary },
+      planned: cardio ? { duration_seconds: number("#exercise-duration") * 60, speed_kmh: number("#exercise-speed"), distance_km: number("#exercise-distance"), incline_percent: number("#exercise-incline") } : { nominal_load_kg: number("#exercise-weight"), sets: number("#exercise-sets"), reps: number("#exercise-reps"), rest_seconds: number("#exercise-rest") }
+    };
+    try { sessionStorage.setItem("herakles.sessionDraft.v1", JSON.stringify(draft)); }
+    catch (error) { console.warn("Draft storage unavailable",error); }
+    showScreen("timer");
+  });
+
   document.querySelectorAll("[data-placeholder-nav]").forEach(button => button.addEventListener("click", () => {
     window.alert(`${button.dataset.placeholderNav} : cette rubrique sera disponible prochainement.`);
   }));
