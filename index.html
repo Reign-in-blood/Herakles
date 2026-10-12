@@ -11,63 +11,106 @@
   <title>Herakles</title>
 </head>
 <body>
-  <main class="test-page">
-    <section class="brand-block" aria-labelledby="page-title">
-      <p class="eyebrow">Ἡρακλῆς · Herakles</p>
-      <h1 id="page-title">La force dans la simplicité.</h1>
-      <p class="intro">
-        Page de test du socle graphique et de la PWA Herakles.
-      </p>
+  <main class="app-shell">
+    <header class="app-header">
+      <div class="brand-lockup">
+        <div class="brand-mark" aria-hidden="true">H</div>
+        <div>
+          <p class="eyebrow">Ἡρακλῆς · Herakles</p>
+          <p class="screen-name">Chronos</p>
+        </div>
+      </div>
 
-      <div class="hero-actions">
-        <button id="primary-test-button" class="button button-primary" type="button">
-          Commencer
+      <button id="install-button" class="icon-button" type="button" hidden>
+        Installer
+      </button>
+    </header>
+
+    <div class="greek-rule" aria-hidden="true"></div>
+
+    <section id="rest-timer" class="timer-screen" aria-labelledby="timer-title" data-timer-state="idle">
+      <header class="timer-heading">
+        <p class="section-kicker">Récupération</p>
+        <h1 id="timer-title">Temps de repos</h1>
+        <p class="timer-intro">Un chrono rapide, lisible et fiable entre deux séries.</p>
+      </header>
+
+      <div class="preset-grid" aria-label="Durées rapides">
+        <button class="preset-button" type="button" data-rest-seconds="60" aria-pressed="false">1:00</button>
+        <button class="preset-button" type="button" data-rest-seconds="90" aria-pressed="false">1:30</button>
+        <button class="preset-button" type="button" data-rest-seconds="120" aria-pressed="true">2:00</button>
+        <button class="preset-button" type="button" data-rest-seconds="180" aria-pressed="false">3:00</button>
+      </div>
+
+      <div class="timer-card">
+        <div class="timer-dial" aria-label="Chronomètre de repos">
+          <svg class="timer-ring" viewBox="0 0 240 240" aria-hidden="true">
+            <circle class="timer-ring-track" cx="120" cy="120" r="104"></circle>
+            <circle id="timer-ring-progress" class="timer-ring-progress" cx="120" cy="120" r="104"></circle>
+          </svg>
+
+          <div class="timer-readout">
+            <span id="timer-display" class="timer-value">02:00</span>
+            <span id="timer-state" class="timer-state" aria-live="polite">Prêt pour la prochaine série</span>
+          </div>
+        </div>
+
+        <div class="timer-adjustments" aria-label="Ajuster le chrono">
+          <button id="timer-minus" class="adjust-button" type="button" aria-label="Retirer 30 secondes">−30 s</button>
+          <button id="timer-plus" class="adjust-button" type="button" aria-label="Ajouter 30 secondes">+30 s</button>
+        </div>
+
+        <button id="timer-action" class="button button-primary timer-action" type="button">
+          Démarrer
         </button>
-        <button id="install-button" class="button button-secondary" type="button" hidden>
-          Installer l’application
+
+        <button id="timer-reset" class="text-button" type="button">
+          Réinitialiser le chrono
         </button>
       </div>
-    </section>
 
-    <section class="status-grid" aria-label="État de l'application">
-      <article class="card">
-        <span class="card-label">Connexion</span>
-        <strong id="network-status">Vérification…</strong>
-        <small>Le mode hors ligne sera pris en charge par la PWA.</small>
-      </article>
+      <div class="rest-stats" aria-label="Mesures du repos">
+        <article class="rest-stat">
+          <span>Repos prévu</span>
+          <strong id="rest-target">02:00</strong>
+        </article>
+        <article class="rest-stat">
+          <span>Repos réel</span>
+          <strong id="rest-actual">—</strong>
+        </article>
+      </div>
 
-      <article class="card">
-        <span class="card-label">Stockage local</span>
-        <strong id="storage-status">Initialisation…</strong>
-        <small id="session-count">—</small>
-      </article>
-    </section>
-
-    <section class="update-card" aria-labelledby="update-title">
-      <div>
-        <span class="card-label">Application</span>
-        <h2 id="update-title">Mises à jour</h2>
-        <p id="update-status" class="update-status" aria-live="polite">
-          Recherche automatique au démarrage.
+      <aside class="test-note">
+        <span class="test-note-mark" aria-hidden="true">◆</span>
+        <p>
+          Pour le test en salle : démarre le chrono à la fin d’une série, passe sur une autre application ou verrouille brièvement l’écran, puis reviens vérifier que le temps reste juste.
         </p>
-      </div>
-
-      <div class="update-actions">
-        <button id="check-update-button" class="button button-secondary" type="button">
-          Rechercher une mise à jour
-        </button>
-        <button id="apply-update-button" class="button button-primary" type="button" hidden>
-          Installer la mise à jour
-        </button>
-      </div>
+      </aside>
     </section>
 
-    <section class="asset-note">
-      <span class="card-label">Assets</span>
-      <p>
-        Les prochaines images pourront être ajoutées dans <code>assets/</code> puis intégrées à cette page.
-      </p>
-    </section>
+    <details class="system-panel">
+      <summary>État de l’application</summary>
+
+      <div class="system-grid">
+        <article>
+          <span>Connexion</span>
+          <strong id="network-status">Vérification…</strong>
+        </article>
+        <article>
+          <span>Stockage</span>
+          <strong id="storage-status">Initialisation…</strong>
+          <small id="session-count">—</small>
+        </article>
+      </div>
+
+      <div class="update-block">
+        <p id="update-status" class="update-status" aria-live="polite">Recherche automatique au démarrage.</p>
+        <div class="update-actions">
+          <button id="check-update-button" class="button button-secondary" type="button">Rechercher une mise à jour</button>
+          <button id="apply-update-button" class="button button-primary" type="button" hidden>Installer la mise à jour</button>
+        </div>
+      </div>
+    </details>
   </main>
 
   <script type="module" src="./src/app.js"></script>
