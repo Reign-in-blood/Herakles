@@ -1,0 +1,56 @@
+# Herakles — fichiers locaux à ne pas versionner
+
+# Dépendances / outils de build éventuels
+node_modules/
+dist/
+build/
+.vite/
+coverage/
+
+# Variables d'environnement et secrets
+.env
+.env.*
+!.env.example
+
+# Journaux
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Données utilisateur / exports locaux
+# Ne jamais versionner de données personnelles ou de santé réelles.
+data/local/
+data/private/
+exports/
+backups/
+*.private.json
+*.local.json
+
+# Fichiers temporaires
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Éditeurs / IDE
+.vscode/
+.idea/
+*.code-workspace
+
+# Systèmes d'exploitation
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+Desktop.ini
+
+# Python (utile si un serveur local ou des scripts ponctuels sont utilisés)
+__pycache__/
+*.py[cod]
+
+# Divers caches locaux
+.cache/
+.tmp/
