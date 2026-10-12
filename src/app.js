@@ -1,4 +1,5 @@
 import { countSessions, openDatabase } from "./storage.js";
+import { initNotificationControls } from "./notifications.js";
 import { initRestTimer } from "./rest-timer.js";
 
 const storageStatus = document.querySelector("#storage-status");
@@ -188,6 +189,7 @@ document.addEventListener("visibilitychange", () => {
   }
 });
 
+initNotificationControls();
 initRestTimer();
 updateNetworkStatus();
 void registerServiceWorker();
