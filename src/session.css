@@ -1,0 +1,68 @@
+/* Styles spécifiques au panneau de séance. */
+
+/*
+ * Une série terminée garde la même présence visuelle qu'une série à faire,
+ * mais devient une ligne de lecture seule plus compacte.
+ */
+.session-set-completed {
+  display: grid;
+  grid-template-columns: minmax(72px, 1fr) auto auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 1px solid var(--color5);
+  border-radius: var(--radius2);
+  background: linear-gradient(145deg, var(--color3), var(--color2));
+  color: var(--color7);
+}
+
+.session-set-completed > strong {
+  min-width: 0;
+  margin: 0;
+  color: var(--color7);
+  font-size: 1.05rem;
+}
+
+.session-set-completed .session-set-metric {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 7px 9px;
+  border: 1px solid var(--color5);
+  border-radius: var(--radius1);
+  background: var(--color1);
+  color: var(--color7);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.session-set-completed .session-set-completed-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 7px 9px;
+  border: 1px solid var(--color14);
+  border-radius: var(--radius1);
+  background: var(--color15);
+  color: var(--color14);
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+@media (max-width: 420px) {
+  .session-set-completed {
+    grid-template-columns: auto 1fr 1fr auto;
+    gap: 6px;
+    padding: 12px;
+  }
+
+  .session-set-completed .session-set-metric,
+  .session-set-completed .session-set-completed-status {
+    padding-inline: 6px;
+  }
+}
