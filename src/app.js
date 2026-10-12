@@ -1,4 +1,4 @@
-import { countSessions, openDatabase } from "./storage.js";
+import { countSessions, openDatabase, saveSession } from "./storage.js";
 import { initNotificationControls } from "./notifications.js";
 import { CATEGORIES, EXERCISES, RESISTANCE_LABELS } from "./exercises.js";
 import { initRestTimer } from "./rest-timer.js";
@@ -193,6 +193,7 @@ document.addEventListener("visibilitychange", () => {
 function initHome() {
   const home = document.querySelector("#home-screen");
   const flow = document.querySelector("#exercise-flow");
+  const sessionPanel = document.querySelector("#session-panel");
   const timer = document.querySelector("#rest-timer");
   const system = document.querySelector("#system-panel");
   const back = document.querySelector("#back-home-button");
@@ -232,6 +233,7 @@ function initHome() {
   function showScreen(screen) {
     home.hidden = screen !== "home";
     flow.hidden = screen !== "exercise";
+    sessionPanel.hidden = screen !== "session";
     timer.hidden = screen !== "timer";
     system.hidden = screen !== "settings";
     back.hidden = screen === "home";
@@ -243,6 +245,8 @@ function initHome() {
   }
   document.querySelector("#start-workout-button").addEventListener("click", () => { resetExerciseFlow(); showScreen("exercise"); });
   back.addEventListener("click", () => {
+    if (!sessionPanel.hidden && activeSession) { if (!window.confirm("Quitter l’écran de séance ? La séance restera en cours.")) return; showScreen("home"); return; }
+    if (!timer.hidden && activeSession) { restTimer.finish(); return; }
     if (!flow.hidden && exerciseStep === "config") { showExerciseList(); return; }
     if (!flow.hidden && exerciseStep === "list") { showCategories(); return; }
     showScreen("home");
@@ -332,8 +336,155 @@ function initHome() {
     };
     try { sessionStorage.setItem("herakles.sessionDraft.v1", JSON.stringify(draft)); }
     catch (error) { console.warn("Draft storage unavailable",error); }
-    showScreen("timer");
+    startSession(draft);
   });
+
+
+  const ACTIVE_KEY = "herakles.activeSession.v1";
+  let activeSession = null;
+  let pendingSetIndex = null;
+  const sessionSets = document.querySelector("#session-sets");
+  const sessionTitle = document.querySelector("#session-exercise-title");
+  const sessionProgress = document.querySelector("#session-progress");
+  const sessionElapsed = document.querySelector("#session-elapsed");
+  const sessionFeedback = document.querySelector("#session-feedback");
+  const finishRestButton = document.querySelector("#finish-session-rest");
+  const restTimer = initRestTimer({ onFinish: completeRest });
+  function persistActiveSession() {
+    if (!activeSession) { localStorage.removeItem(ACTIVE_KEY); return; }
+    try { localStorage.setItem(ACTIVE_KEY, JSON.stringify(activeSession)); }
+    catch (error) { console.warn("Session draft could not be saved",error); }
+  }
+  function startSession(draft) {
+    const planned = draft.planned;
+    activeSession = {
+      schema_version: 1,
+      id: crypto.randomUUID?.() || `session-${Date.now()}`,
+      started_at: draft.started_at,
+      exercise: draft.exercise,
+      planned,
+      sets: draft.exercise.type === "cardio" ? [] : Array.from({length:planned.sets}, (_,index) => ({
+        index: index + 1, reps: planned.reps, nominal_load_kg: planned.nominal_load_kg, completed_at: null, rest_seconds_actual: null
+      })),
+      cardio_completed: false
+    };
+    pendingSetIndex = null;
+    persistActiveSession();
+    renderSession();
+    showScreen("session");
+  }
+  function formatElapsed(ms) {
+    const seconds = Math.max(0,Math.floor(ms / 1000));
+    return [Math.floor(seconds/3600),Math.floor(seconds/60)%60,seconds%60].map(value=>String(value).padStart(2,"0")).join(":");
+  }
+  function renderSessionClock() {
+    if (activeSession) sessionElapsed.textContent = formatElapsed(Date.now()-new Date(activeSession.started_at).getTime());
+  }
+  function createSetInput(index,field,label,value,step) {
+    const wrapper = document.createElement("label"); wrapper.className = "session-set-field";
+    const caption = document.createElement("span"); caption.textContent = label;
+    const input = document.createElement("input"); input.type = "number"; input.min = "0"; input.step = String(step); input.inputMode = "decimal"; input.value = String(value);
+    input.setAttribute("aria-label",`Série ${index+1} : ${label}`);
+    input.addEventListener("change", () => {
+      const next = Number(input.value);
+      if (!Number.isFinite(next) || next < 0) { input.value = String(activeSession.sets[index][field]); return; }
+      activeSession.sets[index][field] = field === "reps" ? Math.floor(next) : next;
+      input.value = String(activeSession.sets[index][field]);
+      persistActiveSession();
+    });
+    wrapper.append(caption,input); return wrapper;
+  }
+  function renderSession() {
+    if (!activeSession) return;
+    sessionTitle.textContent = activeSession.exercise.name;
+    sessionSets.replaceChildren();
+    sessionFeedback.textContent = "";
+    renderSessionClock();
+    if (activeSession.exercise.type === "cardio") {
+      sessionProgress.textContent = "Cardio en cours";
+      const detail = document.createElement("p"); detail.textContent = `Objectif : ${Math.round(activeSession.planned.duration_seconds/60)} min`;
+      const finish = document.createElement("button"); finish.type="button"; finish.className="button button-primary"; finish.textContent="Terminer le cardio";
+      finish.addEventListener("click",()=> { activeSession.cardio_completed = true; void finishSession(); });
+      sessionSets.append(detail,finish); return;
+    }
+    const firstPending = activeSession.sets.findIndex(set=>!set.completed_at);
+    const done = activeSession.sets.length - (firstPending === -1 ? 0 : activeSession.sets.length-firstPending);
+    sessionProgress.textContent = `${activeSession.sets.filter(set=>set.completed_at).length} / ${activeSession.sets.length} séries effectuées`;
+    activeSession.sets.forEach((set,index) => {
+      const card = document.createElement("div"); card.className = "session-set-card";
+      const heading = document.createElement("strong"); heading.textContent = `Série ${index+1}`;
+      const status = document.createElement("span"); status.className = "session-set-status " + (set.completed_at ? "is-done" : "is-pending");
+      status.textContent = set.completed_at ? "✓ Effectuée" : "● À faire";
+      const fields = document.createElement("div"); fields.className = "session-set-fields";
+      fields.append(createSetInput(index,"reps","Répétitions",set.reps,1),createSetInput(index,"nominal_load_kg","Charge (kg)",set.nominal_load_kg,0.5));
+      const top = document.createElement("div"); top.className = "session-set-top"; top.append(heading,status);
+      card.append(top,fields); sessionSets.append(card);
+      if (index === firstPending) {
+        const button = document.createElement("button"); button.type = "button"; button.className = "button button-primary session-rest-button";
+        const last = index === activeSession.sets.length-1;
+        button.textContent = last ? "Terminer l’exercice" : "Commencer la récupération";
+        button.addEventListener("click", () => {
+          if (last) {
+            set.completed_at = new Date().toISOString();
+            persistActiveSession(); renderSession(); return;
+          }
+          pendingSetIndex = index;
+          set.completed_at = new Date().toISOString();
+          persistActiveSession();
+          finishRestButton.hidden = false;
+          restTimer.start(activeSession.planned.rest_seconds);
+          showScreen("timer");
+        });
+        sessionSets.append(button);
+      }
+    });
+    if (firstPending === -1) {
+      const finish = document.createElement("button"); finish.type="button"; finish.className="button button-primary"; finish.textContent="Terminer et enregistrer la séance";
+      finish.addEventListener("click",()=>void finishSession());
+      sessionSets.append(finish);
+    }
+  }
+  function completeRest(actualSeconds) {
+    if (!activeSession || pendingSetIndex === null) return;
+    const set = activeSession.sets[pendingSetIndex];
+    if (set) set.rest_seconds_actual = actualSeconds;
+    pendingSetIndex = null;
+    finishRestButton.hidden = true;
+    persistActiveSession();
+    renderSession();
+    showScreen("session");
+  }
+  finishRestButton.addEventListener("click", () => restTimer.finish());
+  async function finishSession() {
+    if (!activeSession) return;
+    const ended = new Date().toISOString();
+    const record = {
+      schema_version: 1, id: activeSession.id, started_at: activeSession.started_at, ended_at: ended,
+      duration_seconds: Math.floor((Date.now()-new Date(activeSession.started_at).getTime())/1000),
+      exercises: [{...activeSession.exercise, planned: activeSession.planned, sets: activeSession.sets, cardio_completed: activeSession.cardio_completed}],
+      session_volume_kg: activeSession.sets.filter(set=>set.completed_at).reduce((sum,set)=>sum+set.reps*set.nominal_load_kg,0)
+    };
+    try {
+      await saveSession(record);
+      activeSession = null; pendingSetIndex = null; persistActiveSession();
+      finishRestButton.hidden = true;
+      showScreen("home");
+      void initStorage();
+      window.alert("Séance enregistrée sur cet appareil.");
+    } catch (error) {
+      console.error("Session save failed",error);
+      sessionFeedback.textContent = "Enregistrement impossible. Les données restent conservées provisoirement sur cet appareil.";
+    }
+  }
+  try {
+    const stored = JSON.parse(localStorage.getItem(ACTIVE_KEY));
+    if (stored?.schema_version === 1 && Array.isArray(stored.sets) && stored.exercise && stored.started_at) {
+      activeSession = stored;
+      renderSession();
+      showScreen("session");
+    }
+  } catch (error) { console.warn("Session restore failed",error); }
+  window.setInterval(renderSessionClock,1000);
 
   document.querySelectorAll("[data-placeholder-nav]").forEach(button => button.addEventListener("click", () => {
     window.alert(`${button.dataset.placeholderNav} : cette rubrique sera disponible prochainement.`);
@@ -351,7 +502,6 @@ function initHome() {
 
 initHome();
 initNotificationControls();
-initRestTimer();
 updateNetworkStatus();
 void registerServiceWorker();
 void initStorage();
