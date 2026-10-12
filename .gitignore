@@ -6,6 +6,7 @@ dist/
 build/
 .vite/
 coverage/
+Materiel/
 
 # Variables d'environnement et secrets
 .env
