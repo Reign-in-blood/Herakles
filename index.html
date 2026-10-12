@@ -85,7 +85,7 @@
         <p class="timer-intro">Un chrono rapide, lisible et fiable entre deux séries.</p>
       </header>
 
-      <div class="preset-grid" aria-label="Durées rapides">
+      <div class="preset-grid" id="timer-presets" aria-label="Durées rapides">
         <button class="preset-button" type="button" data-rest-seconds="60" aria-pressed="false">1:00</button>
         <button class="preset-button" type="button" data-rest-seconds="90" aria-pressed="false">1:30</button>
         <button class="preset-button" type="button" data-rest-seconds="120" aria-pressed="true">2:00</button>
@@ -119,7 +119,6 @@
         </button>
       </div>
 
-      <button id="finish-session-rest" class="button button-secondary" type="button" hidden>Fin de la récupération · Retour aux séries</button>
       <div class="rest-stats" aria-label="Mesures du repos">
         <article class="rest-stat">
           <span>Repos prévu</span>
@@ -131,12 +130,6 @@
         </article>
       </div>
 
-      <aside class="test-note">
-        <span class="test-note-mark" aria-hidden="true">◆</span>
-        <p>
-          Pour le test en salle : démarre le chrono à la fin d’une série, passe sur une autre application ou verrouille brièvement l’écran, puis reviens vérifier que le temps reste juste.
-        </p>
-      </aside>
     </section>
 
     <details class="system-panel" id="system-panel" hidden>
