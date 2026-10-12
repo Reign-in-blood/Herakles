@@ -153,26 +153,13 @@ button:disabled {
 }
 
 .greek-rule {
-  position: relative;
-  height: 10px;
+  height: 18px;
   margin-bottom: 28px;
-  border-top: 1px solid var(--color6);
-  border-bottom: 1px solid var(--color6);
-  overflow: hidden;
-}
-
-.greek-rule::after {
-  position: absolute;
-  inset: 3px 0;
-  background: repeating-linear-gradient(
-    90deg,
-    var(--color13) 0 10px,
-    transparent 10px 15px,
-    var(--color13) 15px 18px,
-    transparent 18px 24px
-  );
-  content: "";
-  opacity: 0.62;
+  background-image: url("../assets/Pattern-frame.svg");
+  background-repeat: repeat-x;
+  background-position: left center;
+  background-size: 18px 18px;
+  opacity: 0.72;
 }
 
 .timer-screen {
