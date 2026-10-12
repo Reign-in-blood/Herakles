@@ -1,10 +1,11 @@
-const CACHE_NAME = "herakles-shell-v3";
+const CACHE_NAME = "herakles-shell-v4";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
   "./src/styles.css",
   "./src/app.js",
+  "./src/notifications.js",
   "./src/rest-timer.js",
   "./src/storage.js",
   "./assets/icons/herakles.svg"
@@ -33,6 +34,26 @@ self.addEventListener("activate", (event) => {
     )
   );
   self.clients.claim();
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
+      for (const client of clients) {
+        if ("focus" in client) {
+          return client.focus();
+        }
+      }
+
+      if (self.clients.openWindow) {
+        return self.clients.openWindow(self.registration.scope);
+      }
+
+      return undefined;
+    })
+  );
 });
 
 self.addEventListener("fetch", (event) => {
