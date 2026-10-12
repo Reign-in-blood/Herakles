@@ -1,3 +1,5 @@
+import { notifyRestFinished } from "./notifications.js";
+
 const STORAGE_KEY = "herakles.restTimer.v1";
 const DEFAULT_SECONDS = 120;
 const MIN_SECONDS = 30;
@@ -108,6 +110,8 @@ function triggerAlarm() {
   } else {
     playAlarm();
   }
+
+  void notifyRestFinished();
 }
 
 export function initRestTimer() {
