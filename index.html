@@ -115,15 +115,21 @@
         </div>
       </div>
 
-      <div class="update-block">
-        <p id="update-status" class="update-status" aria-live="polite">Recherche automatique au démarrage.</p>
-        <div class="update-actions">
-          <button id="check-update-button" class="button button-secondary" type="button">Rechercher une mise à jour</button>
-          <button id="apply-update-button" class="button button-primary" type="button" hidden>Installer la mise à jour</button>
-        </div>
-      </div>
     </details>
   </main>
+
+  <div id="update-dialog" class="update-dialog" role="dialog" aria-modal="true" aria-labelledby="update-dialog-title" aria-describedby="update-dialog-description" hidden>
+    <div class="update-dialog-card">
+      <p class="section-kicker">Mise à jour</p>
+      <h2 id="update-dialog-title">Une nouvelle version est disponible</h2>
+      <p id="update-dialog-description">Une mise à jour de Herakles est prête. Tu peux l’installer maintenant ou continuer ta séance.</p>
+      <p id="update-status" class="update-status" role="status" aria-live="polite"></p>
+      <div class="update-dialog-actions">
+        <button id="postpone-update-button" class="button button-secondary" type="button">Plus tard</button>
+        <button id="apply-update-button" class="button button-primary" type="button">Installer</button>
+      </div>
+    </div>
+  </div>
 
   <script type="module" src="./src/app.js"></script>
 </body>

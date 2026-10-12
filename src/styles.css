@@ -576,3 +576,41 @@ button:disabled {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Fenêtre de mise à jour PWA */
+body.update-dialog-open { overflow: hidden; }
+.update-dialog {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.78);
+}
+.update-dialog-card {
+  width: min(100%, 420px);
+  padding: 26px 22px 22px;
+  border: 1px solid var(--color12);
+  border-radius: var(--radius3);
+  background: var(--color3);
+  box-shadow: 0 20px 80px var(--color1);
+}
+.update-dialog-card h2 {
+  margin: 12px 0;
+  color: var(--color7);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.6rem;
+  line-height: 1.2;
+}
+.update-dialog-card > p:not(.section-kicker) {
+  color: var(--color8);
+  line-height: 1.5;
+}
+.update-dialog-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 20px;
+}
+.update-dialog-actions .button { min-width: 0; }
