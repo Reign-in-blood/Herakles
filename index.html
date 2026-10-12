@@ -12,23 +12,40 @@
 </head>
 <body>
   <main class="app-shell">
-    <header class="app-header">
-      <div class="brand-lockup">
-        <div class="brand-mark" aria-hidden="true">H</div>
-        <div>
-          <p class="eyebrow">Ἡρακλῆς · Herakles</p>
-          <p class="screen-name">Chronos</p>
-        </div>
-      </div>
-
-      <button id="install-button" class="icon-button" type="button" hidden>
-        Installer
-      </button>
+    <header class="app-header home-header">
+      <div class="brand-lockup"><div class="brand-mark" aria-hidden="true">❧</div><strong class="brand-title">Herakles</strong></div>
+      <button id="install-button" class="icon-button" type="button" hidden>Installer</button>
+      <button class="profile-button" type="button" aria-label="Profil (à venir)" data-placeholder-nav="Profil">♙</button>
     </header>
-
     <div class="greek-rule" aria-hidden="true"></div>
 
-    <section id="rest-timer" class="timer-screen" aria-labelledby="timer-title" data-timer-state="idle">
+    <section id="home-screen" class="home-screen" aria-label="Accueil">
+      <div class="hero-card">
+        <div class="hero-content"><p class="hero-kicker">AUJOURD’HUI</p><p class="hero-date"><span id="today-date">—</span><span id="today-time">—</span></p></div>
+        <div class="hero-statue" aria-hidden="true">Η</div>
+        <button id="start-workout-button" class="hero-start" type="button"><span aria-hidden="true">▶</span> Commencer</button>
+      </div>
+      <div class="period-tabs" role="group" aria-label="Période des statistiques">
+        <button class="period-tab is-active" data-period="7" aria-pressed="true" type="button">7 jours</button>
+        <button class="period-tab" data-period="30" aria-pressed="false" type="button">30 jours</button>
+        <button class="period-tab" data-period="84" aria-pressed="false" type="button">12 semaines</button>
+      </div>
+      <section class="activity-section" aria-labelledby="activity-title">
+        <div class="section-title-line"><h1 id="activity-title">Activité d’entraînement</h1><span class="demo-label">Aperçu fictif</span></div>
+        <div id="activity-chart" class="activity-chart" role="img" aria-label="Graphique de démonstration de la durée des entraînements"></div>
+      </section>
+      <div class="dashboard-grid">
+        <article class="dashboard-card"><span class="dashboard-icon" aria-hidden="true">⚊</span><div><strong>4</strong><span>séances</span><small>sur 7 jours</small></div></article>
+        <article class="dashboard-card"><span class="dashboard-icon" aria-hidden="true">◷</span><div><strong>3 h 42</strong><span>durée totale</span><small>+28 % vs semaine préc.</small></div></article>
+        <article class="dashboard-card"><span class="dashboard-icon" aria-hidden="true">▥</span><div><strong>+12 %</strong><span>progression</span><small>sur les charges</small></div></article>
+        <article class="dashboard-card"><span class="dashboard-icon" aria-hidden="true">♨</span><div><span>Calories estimées</span><strong>420 <em>kcal</em></strong></div></article>
+        <article class="dashboard-card"><span class="dashboard-icon" aria-hidden="true">▥</span><div><span>Volume total</span><strong>12 450 <em>kg</em></strong></div></article>
+        <article class="dashboard-card"><span class="dashboard-icon" aria-hidden="true">⚊</span><div><span>Exercices réalisés</span><strong>6</strong></div></article>
+      </div>
+    </section>
+    <button id="back-home-button" class="back-home-button" type="button" hidden>← Retour à l’accueil</button>
+
+    <section id="rest-timer" class="timer-screen" hidden aria-labelledby="timer-title" data-timer-state="idle">
       <header class="timer-heading">
         <p class="section-kicker">Récupération</p>
         <h1 id="timer-title">Temps de repos</h1>
@@ -88,7 +105,7 @@
       </aside>
     </section>
 
-    <details class="system-panel">
+    <details class="system-panel" id="system-panel" hidden>
       <summary>État de l’application</summary>
 
       <div class="system-grid">
@@ -116,6 +133,7 @@
       </div>
 
     </details>
+    <nav class="bottom-nav" aria-label="Navigation principale"><button type="button" class="nav-item is-current" data-nav="home" aria-current="page"><span aria-hidden="true">⌂</span>Accueil</button><button type="button" class="nav-item" data-placeholder-nav="Progression"><span aria-hidden="true">▥</span>Progression</button><button type="button" class="nav-item" data-placeholder-nav="Entraînements"><span aria-hidden="true">♜</span>Entraînements</button><button type="button" class="nav-item" data-nav="settings"><span aria-hidden="true">⚙</span>Réglages</button></nav>
   </main>
 
   <div id="update-dialog" class="update-dialog" role="dialog" aria-modal="true" aria-labelledby="update-dialog-title" aria-describedby="update-dialog-description" hidden>
