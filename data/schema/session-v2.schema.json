@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://reign-in-blood.github.io/Herakles/data/schema/session-v2.schema.json",
+  "title": "Herakles workout session v2",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "id",
+    "started_at",
+    "ended_at",
+    "duration_seconds",
+    "exercises",
+    "summary"
+  ],
+  "properties": {
+    "schema_version": { "const": 2 },
+    "id": { "type": "string", "minLength": 1 },
+    "started_at": { "type": "string", "format": "date-time" },
+    "ended_at": { "type": "string", "format": "date-time" },
+    "duration_seconds": { "type": "integer", "minimum": 0 },
+    "theme_id": { "type": ["string", "null"] },
+    "exercises": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/exerciseOccurrence" }
+    },
+    "summary": { "$ref": "#/$defs/sessionSummary" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "exerciseOccurrence": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "name",
+        "started_at",
+        "ended_at",
+        "duration_seconds"
+      ],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "type": { "type": "string", "enum": ["strength", "cardio"] },
+        "name": { "type": "string", "minLength": 1 },
+        "resistance": { "type": ["string", "null"] },
+        "primary_muscles": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "started_at": { "type": "string", "format": "date-time" },
+        "ended_at": { "type": "string", "format": "date-time" },
+        "duration_seconds": { "type": "integer", "minimum": 0 },
+        "planned": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "sets": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/strengthSet" }
+        },
+        "cardio_completed": { "type": "boolean" },
+        "total_reps": { "type": "number", "minimum": 0 },
+        "volume_kg": { "type": "number", "minimum": 0 },
+        "estimated_calories_kcal": { "type": "number", "minimum": 0 },
+        "calories_estimate": { "$ref": "#/$defs/calorieEstimate" }
+      },
+      "additionalProperties": false
+    },
+    "strengthSet": {
+      "type": "object",
+      "required": ["index", "reps", "nominal_load_kg"],
+      "properties": {
+        "index": { "type": "integer", "minimum": 1 },
+        "reps": { "type": "integer", "minimum": 0 },
+        "nominal_load_kg": { "type": "number", "minimum": 0 },
+        "completed_at": { "type": ["string", "null"], "format": "date-time" },
+        "rest_seconds_actual": { "type": ["integer", "null"], "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "calorieEstimate": {
+      "type": "object",
+      "required": ["method", "met", "reference_body_weight_kg"],
+      "properties": {
+        "method": { "const": "MET" },
+        "met": { "type": "number", "minimum": 0 },
+        "reference_body_weight_kg": { "type": "number", "exclusiveMinimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "sessionSummary": {
+      "type": "object",
+      "required": [
+        "exercise_count",
+        "total_reps",
+        "volume_kg",
+        "estimated_calories_kcal"
+      ],
+      "properties": {
+        "exercise_count": { "type": "integer", "minimum": 1 },
+        "total_reps": { "type": "number", "minimum": 0 },
+        "volume_kg": { "type": "number", "minimum": 0 },
+        "estimated_calories_kcal": { "type": "number", "minimum": 0 }
+      },
+      "additionalProperties": false
+    }
+  }
+}
