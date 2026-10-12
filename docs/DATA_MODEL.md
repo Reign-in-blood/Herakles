@@ -18,6 +18,7 @@ La donnée principale est la **séance**. Une séance est composée d'un ou plus
 
 ```text
 séance
+├── thème / groupe actif
 ├── informations globales
 ├── exercice 1
 │   ├── données brutes
@@ -32,20 +33,26 @@ Le cycle applicatif associé est :
 
 ```text
 commencer séance
+→ choisir un thème / groupe
+→ choisir un exercice dans ce thème
 → réaliser exercice
 → récapitulatif exercice
 → ajouter exercice à la séance active
-→ exercice suivant éventuel
-→ terminer séance
+→ retour à la liste des exercices du même thème
+→ exercice suivant éventuel ou terminer séance
 → récapitulatif global
 → enregistrer séance complète
 ```
 
 **Terminer un exercice ne termine jamais implicitement la séance.**
 
+Le thème choisi reste le contexte de sélection jusqu'à la fin de la séance. Après l'enregistrement d'un exercice, l'interface revient directement à la liste des exercices de ce thème, sans repasser par le choix des groupes.
+
 ## Séance active et séance terminée
 
 Pendant l'entraînement, la séance active doit pouvoir être restaurée après rafraîchissement ou fermeture accidentelle. Elle contient progressivement les exercices déjà validés et, si nécessaire, l'exercice actuellement en cours.
+
+Le thème actif est conservé séparément pendant la séance afin de pouvoir restaurer directement la bonne liste d'exercices.
 
 Une fois la séance explicitement terminée, l'objet complet est enregistré dans IndexedDB. L'enregistrement final doit conserver l'ordre des exercices.
 
@@ -61,50 +68,53 @@ volume_kg = reps × load_kg
 
 Un résumé d'exercice ou de séance peut conserver des agrégats pour accélérer l'affichage, mais l'application doit toujours pouvoir les recalculer à partir des données brutes.
 
-## Structure générale actuelle
+## Versionnement des séances
 
-Le schéma JSON v1 actuel représente la séance ainsi :
+Le format historique v1 reste décrit par :
+
+```text
+data/schema/session.schema.json
+```
+
+Le nouveau flux multi-exercices utilise le format v2 décrit par :
+
+```text
+data/schema/session-v2.schema.json
+```
+
+Le format v2 ajoute notamment :
+
+- un `theme_id` facultatif pour le groupe actif ;
+- les dates de début et de fin propres à chaque exercice ;
+- la durée propre à chaque exercice ;
+- les résumés par exercice ;
+- un résumé global de séance calculé depuis `exercises[]`.
+
+Les séances v1 existantes ne doivent pas être réécrites silencieusement. Les futures lectures d'historique devront accepter les deux versions ou appliquer une migration explicite.
+
+## Structure générale v2
 
 ```text
 session
-├── schema_version
+├── schema_version = 2
 ├── id
+├── theme_id
 ├── started_at
 ├── ended_at
 ├── duration_seconds
-├── user_snapshot
-│   ├── weight_kg
-│   └── height_cm
 ├── exercises[]
-│   ├── strength
-│   │   ├── equipment
-│   │   └── sets[]
-│   └── cardio
-│       ├── equipment
-│       ├── duration_seconds
-│       ├── distance_km
-│       └── elevation_gain_m
-├── summary
-└── notes
+│   ├── id / type / name
+│   ├── started_at
+│   ├── ended_at
+│   ├── duration_seconds
+│   ├── données brutes
+│   └── données calculées mises en cache
+└── summary
+    ├── exercise_count
+    ├── total_reps
+    ├── volume_kg
+    └── estimated_calories_kcal
 ```
-
-## Évolution nécessaire pour les exercices successifs
-
-Le flux validé impose de distinguer la durée globale de séance de la durée de chaque exercice. Lors de la prochaine évolution compatible du modèle, chaque exercice devra pouvoir conserver au minimum :
-
-- `started_at` ;
-- `ended_at` ;
-- `duration_seconds` ;
-- un résumé propre à l'exercice lorsque pertinent.
-
-Pour la musculation, le résumé d'exercice doit pouvoir fournir au minimum :
-
-- nombre total de séries réalisées ;
-- nombre total de répétitions ;
-- volume total en kg ;
-- calories estimées si cette fonctionnalité est activée.
-
-Ces champs ne doivent pas être ajoutés silencieusement au schéma v1 actuel : toute modification incompatible du JSON Schema doit être versionnée et accompagnée d'une migration.
 
 ## Durées
 
@@ -117,9 +127,9 @@ Les temps de récupération font partie du temps de l'exercice lorsqu'ils se sit
 
 ## Pourquoi un snapshot du poids et de la taille ?
 
-Le profil utilisateur peut changer avec le temps. Une séance garde donc facultativement un instantané des mensurations au moment de la séance. Cela évite qu'une modification future du profil réécrive implicitement l'historique.
+Le profil utilisateur peut changer avec le temps. Une séance pourra garder facultativement un instantané des mensurations au moment de la séance. Cela évite qu'une modification future du profil réécrive implicitement l'historique.
 
-Le snapshot est également utile pour recalculer ultérieurement des estimations dépendant du poids, notamment les calories.
+Le snapshot sera également utile pour recalculer ultérieurement des estimations dépendant du poids, notamment les calories.
 
 ## Musculation
 
@@ -133,9 +143,13 @@ Chaque exercice de force possède des séries distinctes. Cela permet de représ
 
 ### Charge
 
-Le champ canonique du schéma est `load_kg` : c'est la charge nominale choisie pour calculer le volume.
+Dans le modèle v2 courant, la charge réelle d'une série est conservée dans `nominal_load_kg`. Le volume est calculable avec :
 
-Les détails facultatifs permettent d'expliquer comment cette charge a été obtenue :
+```text
+volume_kg = reps × nominal_load_kg
+```
+
+À terme, les détails facultatifs de machine pourront compléter cette charge sans modifier son sens :
 
 - `plates_per_side_kg` ;
 - `plates_total_kg` ;
@@ -144,27 +158,24 @@ Les détails facultatifs permettent d'expliquer comment cette charge a été obt
 - `body_weight_kg` ;
 - `assistance_kg`.
 
-Le poids du corps reste séparé et n'est pas ajouté automatiquement à `load_kg`.
+Le poids du corps reste séparé et n'est pas ajouté automatiquement à la charge nominale.
 
 ## Cardio
 
-Un exercice cardio n'utilise pas de séries de répétitions. Il stocke les mesures utiles de la machine :
+Un exercice cardio n'utilise pas de séries de répétitions. Il stocke les mesures utiles de la machine lorsqu'elles sont disponibles :
 
 - durée ;
 - distance ;
 - dénivelé ;
 - vitesse moyenne ;
 - allure moyenne ;
-- inclinaison moyenne/maximale si connue.
+- inclinaison moyenne/maximale.
 
 ## Repos
 
-Pour chaque série :
+Pour chaque série de musculation, le temps réellement pris est conservé séparément du temps prévu.
 
-- `rest_target_seconds` = repos prévu ;
-- `rest_actual_seconds` = repos réellement pris.
-
-Le chronomètre doit être piloté par un timestamp de fin afin de continuer à être correct après verrouillage de l'écran, changement d'onglet ou rafraîchissement.
+Le chronomètre doit rester piloté par un timestamp de fin afin de continuer à être correct après verrouillage de l'écran, changement d'onglet ou rafraîchissement.
 
 ## Calories estimées
 
@@ -176,14 +187,13 @@ Une approximation simple peut utiliser les MET :
 kcal = MET × 3.5 × weight_kg / 200 × duration_minutes
 ```
 
-Si cette valeur est stockée, conserver autant que possible la méthode de calcul, le MET utilisé et le poids de référence afin de pouvoir la recalculer plus tard. Le poids du `user_snapshot` doit être préféré à une valeur générique dès qu'il est disponible.
+Si cette valeur est stockée, conserver autant que possible la méthode de calcul, le MET utilisé et le poids de référence afin de pouvoir la recalculer plus tard. Le poids du futur snapshot utilisateur doit être préféré à une valeur générique dès qu'il est disponible.
 
 ## Agrégats de séance
 
 Le résumé global doit pouvoir être recalculé à partir de `exercises[]`. Les agrégats utiles incluent notamment :
 
 - `exercise_count` ;
-- total des séries de musculation ;
 - total des répétitions ;
 - volume total en kg ;
 - durée globale de séance ;
@@ -207,6 +217,7 @@ Stocker les dates/heures en ISO 8601 avec fuseau, par exemple :
 
 ## Version du schéma
 
-La première version est `1`. Toute modification incompatible doit augmenter `schema_version` et fournir une migration.
+- v1 : format historique initial ;
+- v2 : format actuel multi-exercices avec récapitulatif de séance.
 
-Le schéma de référence se trouve dans `data/schema/session.schema.json`.
+Toute future modification incompatible doit augmenter `schema_version` et prévoir une migration explicite.
