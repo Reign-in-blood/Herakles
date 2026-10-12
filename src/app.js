@@ -188,6 +188,75 @@ document.addEventListener("visibilitychange", () => {
   }
 });
 
+
+function initHome() {
+  const home = document.querySelector("#home-screen");
+  const timer = document.querySelector("#rest-timer");
+  const system = document.querySelector("#system-panel");
+  const back = document.querySelector("#back-home-button");
+  const navHome = document.querySelector('[data-nav="home"]');
+  const navSettings = document.querySelector('[data-nav="settings"]');
+  const date = document.querySelector("#today-date");
+  const time = document.querySelector("#today-time");
+  const chart = document.querySelector("#activity-chart");
+  const chartData = {
+    7: { labels: ["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"], values: [58,102,36,53,69,18,47] },
+    30: { labels: ["S1","S2","S3","S4"], values: [78,98,67,105] },
+    84: { labels: ["S1","S2","S3","S4","S5","S6"], values: [45,76,88,60,101,94] }
+  };
+  function drawChart(period) {
+    const data = chartData[period];
+    chart.replaceChildren();
+    const axis = document.createElement("div");
+    axis.className = "chart-axis";
+    ["120 min","90 min","60 min","30 min","0"].forEach(label => {
+      const el = document.createElement("span"); el.textContent = label; axis.append(el);
+    });
+    chart.append(axis);
+    data.values.forEach((value,i) => {
+      const column = document.createElement("div"); column.className = "chart-column";
+      const bar = document.createElement("div"); bar.className = "chart-bar" + (i === 2 || i === data.values.length-1 ? " is-muted" : "");
+      bar.style.height = `${value / 120 * 100}%`;
+      const label = document.createElement("span"); label.className = "chart-day"; label.textContent = data.labels[i];
+      column.append(bar,label); chart.append(column);
+    });
+  }
+  document.querySelectorAll("[data-period]").forEach(button => button.addEventListener("click", () => {
+    document.querySelectorAll("[data-period]").forEach(item => {
+      const active = item === button; item.classList.toggle("is-active",active); item.setAttribute("aria-pressed",String(active));
+    });
+    drawChart(Number(button.dataset.period));
+  }));
+  function showScreen(screen) {
+    home.hidden = screen !== "home";
+    timer.hidden = screen !== "timer";
+    system.hidden = screen !== "settings";
+    back.hidden = screen === "home";
+    navHome.classList.toggle("is-current",screen === "home");
+    navSettings.classList.toggle("is-current",screen === "settings");
+    if (screen === "home") navHome.setAttribute("aria-current","page"); else navHome.removeAttribute("aria-current");
+    if (screen === "settings") navSettings.setAttribute("aria-current","page"); else navSettings.removeAttribute("aria-current");
+    window.scrollTo(0,0);
+  }
+  document.querySelector("#start-workout-button").addEventListener("click", () => showScreen("timer"));
+  back.addEventListener("click", () => showScreen("home"));
+  navHome.addEventListener("click", () => showScreen("home"));
+  navSettings.addEventListener("click", () => showScreen("settings"));
+  document.querySelectorAll("[data-placeholder-nav]").forEach(button => button.addEventListener("click", () => {
+    window.alert(`${button.dataset.placeholderNav} : cette rubrique sera disponible prochainement.`);
+  }));
+  function updateClock() {
+    const now = new Date();
+    date.textContent = new Intl.DateTimeFormat("fr-FR",{day:"2-digit",month:"long",year:"numeric"}).format(now);
+    time.textContent = new Intl.DateTimeFormat("fr-FR",{hour:"2-digit",minute:"2-digit"}).format(now);
+  }
+  updateClock();
+  window.setInterval(updateClock,30000);
+  drawChart(7);
+  showScreen("home");
+}
+
+initHome();
 initNotificationControls();
 initRestTimer();
 updateNetworkStatus();
