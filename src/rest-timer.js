@@ -114,7 +114,7 @@ function triggerAlarm() {
   void notifyRestFinished();
 }
 
-export function initRestTimer() {
+export function initRestTimer({ onFinish } = {}) {
   const timerRoot = document.querySelector("#rest-timer");
 
   if (!timerRoot) {
@@ -275,6 +275,7 @@ export function initRestTimer() {
     state.alarmTriggered = false;
     saveState(state);
     render(true);
+    if (typeof onFinish === "function") onFinish(state.lastActualSeconds);
   }
 
   function changeTarget(deltaSeconds) {
@@ -338,4 +339,16 @@ export function initRestTimer() {
   render(true);
   void acquireWakeLock();
   window.setInterval(render, TICK_RATE_MS);
+  return {
+    start(seconds) {
+      releaseWakeLock();
+      state = createDefaultState();
+      state.targetSeconds = clamp(Number(seconds) || DEFAULT_SECONDS, MIN_SECONDS, MAX_SECONDS);
+      startTimer();
+    },
+    finish() {
+      if (state.status === "running") stopTimer();
+      else if (typeof onFinish === "function") onFinish(state.lastActualSeconds);
+    }
+  };
 }
