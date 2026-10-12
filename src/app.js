@@ -107,6 +107,45 @@ async function registerServiceWorker() {
   }
 }
 
+const manualUpdateButton = document.querySelector("#check-update-button");
+const manualUpdateStatus = document.querySelector("#manual-update-status");
+manualUpdateButton.addEventListener("click", async () => {
+  manualUpdateButton.disabled = true;
+  manualUpdateStatus.textContent = "Recherche en cours…";
+  try {
+    if (!navigator.onLine) throw new Error("offline");
+    const registration = serviceWorkerRegistration || await navigator.serviceWorker?.getRegistration("./");
+    if (!registration) throw new Error("no service worker");
+    serviceWorkerRegistration = registration;
+    postponedWorker = null;
+    await registration.update();
+    if (registration.installing) {
+      const worker = registration.installing;
+      await new Promise(resolve => {
+        const check = () => {
+          if (worker.state === "installed" || worker.state === "redundant") {
+            worker.removeEventListener("statechange", check);
+            resolve();
+          }
+        };
+        worker.addEventListener("statechange", check);
+        check();
+      });
+    }
+    if (registration.waiting) {
+      manualUpdateStatus.textContent = "Mise à jour disponible.";
+      showAvailableUpdate(registration.waiting);
+    } else {
+      manualUpdateStatus.textContent = "Aucune mise à jour disponible.";
+    }
+  } catch (error) {
+    console.warn("Manual update check failed", error);
+    manualUpdateStatus.textContent = "Recherche impossible. Vérifie la connexion et réessaie.";
+  } finally {
+    manualUpdateButton.disabled = false;
+  }
+});
+
 postponeUpdateButton.addEventListener("click", () => {
   postponedWorker = waitingServiceWorker || serviceWorkerRegistration?.waiting;
   closeUpdateDialog();
