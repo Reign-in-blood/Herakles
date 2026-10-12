@@ -68,6 +68,16 @@
       </form>
       <p id="exercise-flow-message" class="flow-message" role="status" aria-live="polite"></p>
     </section>
+    <section id="session-panel" class="session-panel" hidden aria-labelledby="session-exercise-title">
+      <header class="session-heading">
+        <p class="section-kicker">Séance en cours</p>
+        <h1 id="session-exercise-title">Exercice</h1>
+        <div class="session-time-row"><span>Durée totale de la séance</span><strong id="session-elapsed">00:00:00</strong></div>
+        <p id="session-progress" class="session-progress">0 / 0 séries effectuées</p>
+      </header>
+      <div id="session-sets" class="session-sets"></div>
+      <p id="session-feedback" class="flow-message" role="status" aria-live="polite"></p>
+    </section>
     <section id="rest-timer" class="timer-screen" hidden aria-labelledby="timer-title" data-timer-state="idle">
       <header class="timer-heading">
         <p class="section-kicker">Récupération</p>
@@ -109,6 +119,7 @@
         </button>
       </div>
 
+      <button id="finish-session-rest" class="button button-secondary" type="button" hidden>Fin de la récupération · Retour aux séries</button>
       <div class="rest-stats" aria-label="Mesures du repos">
         <article class="rest-stat">
           <span>Repos prévu</span>
