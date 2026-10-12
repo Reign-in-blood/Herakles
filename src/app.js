@@ -412,6 +412,26 @@ function initHome() {
     const done = activeSession.sets.length - (firstPending === -1 ? 0 : activeSession.sets.length-firstPending);
     sessionProgress.textContent = `${activeSession.sets.filter(set=>set.completed_at).length} / ${activeSession.sets.length} séries effectuées`;
     activeSession.sets.forEach((set,index) => {
+      if (set.completed_at) {
+        const summary = document.createElement("div");
+        summary.className = "session-set-completed";
+        const name = document.createElement("strong");
+        name.textContent = `Série ${index + 1}`;
+        const reps = document.createElement("span");
+        reps.className = "session-set-metric";
+        reps.textContent = `↻ ${set.reps}`;
+        reps.setAttribute("aria-label", `${set.reps} répétitions`);
+        const weight = document.createElement("span");
+        weight.className = "session-set-metric";
+        weight.textContent = `⚖ ${set.nominal_load_kg} kg`;
+        weight.setAttribute("aria-label", `${set.nominal_load_kg} kilogrammes`);
+        const status = document.createElement("span");
+        status.className = "session-set-completed-status";
+        status.textContent = "✓ Effectué";
+        summary.append(name, reps, weight, status);
+        sessionSets.append(summary);
+        return;
+      }
       const card = document.createElement("div"); card.className = "session-set-card";
       const heading = document.createElement("strong"); heading.textContent = `Série ${index+1}`;
       const status = document.createElement("span"); status.className = "session-set-status " + (set.completed_at ? "is-done" : "is-pending");
