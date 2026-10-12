@@ -643,3 +643,28 @@ body.update-dialog-open { overflow: hidden; }
 .nav-item.is-current { color: var(--color7); font-weight: 800; }
 .back-home-button { margin: 0 0 16px; border: 0; background: transparent; color: var(--color10); font-weight: 750; }
 @media(max-width:360px) { .dashboard-card { padding: 12px 8px; gap: 5px; } .dashboard-icon { flex-basis: 20px; font-size: 1.25rem; } .dashboard-card strong { font-size: 1.2rem; } }
+
+/* Parcours de sélection d'exercice */
+.exercise-flow { display: grid; gap: 18px; }
+.flow-heading h1 { margin: 7px 0; font-family: Georgia,"Times New Roman",serif; font-size: clamp(1.9rem,8vw,2.7rem); font-weight: 600; }
+.flow-heading p:last-child { margin: 0; color: var(--color8); font-size: .9rem; }
+.choice-list { display: grid; gap: 12px; }
+.exercise-choice { width: 100%; min-height: 102px; display: flex; align-items: center; gap: 14px; padding: 8px 14px 8px 8px; border: 1px solid var(--color5); border-radius: var(--radius2); background: linear-gradient(115deg,var(--color4),var(--color2)); color: var(--color7); text-align: left; cursor: pointer; }
+.exercise-choice:active { transform: scale(.99); }
+.choice-visual { display: grid; flex: 0 0 116px; min-height: 82px; place-items: center; border: 1px solid var(--color5); border-radius: var(--radius1); background: radial-gradient(circle at 60% 35%,var(--color5),var(--color1)); color: var(--color12); font: bold 3.5rem Georgia,serif; }
+.choice-details { display: grid; flex: 1; min-width: 0; gap: 5px; }
+.exercise-choice strong { font-size: 1rem; line-height: 1.2; }
+.choice-details small { color: var(--color8); font-size: .75rem; }
+.choice-arrow { margin-left: auto; color: var(--color11); font-size: 2.2rem; line-height: 1; }
+.category-choice strong { flex: 1; font-size: 1.2rem; }
+.category-choice .choice-visual { font-size: 3.2rem; }
+.exercise-config { display: grid; gap: 20px; }
+.exercise-selected { display: grid; gap: 8px; padding: 20px; border: 1px solid var(--color5); border-radius: var(--radius2); background: var(--color3); }
+.exercise-selected strong { font-size: 1.25rem; }
+.exercise-selected span { color: var(--color8); font-size: .85rem; }
+.config-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
+.config-grid label { display: grid; gap: 8px; color: var(--color8); font-size: .82rem; }
+.config-grid input { width: 100%; min-width: 0; min-height: 52px; padding: 12px; border: 1px solid var(--color5); border-radius: var(--radius1); background: var(--color3); color: var(--color7); font-size: 1.15rem; }
+.exercise-config .button, #free-exercise-button { width: 100%; }
+.flow-message { color: var(--color8); font-size: .8rem; }
+@media(max-width:390px) { .choice-visual { flex-basis: 90px; } .exercise-choice { gap: 10px; } .choice-details small { font-size: .7rem; } }
