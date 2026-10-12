@@ -698,3 +698,6 @@ body.update-dialog-open { overflow: hidden; }
 .session-set-metric { display: inline-flex; align-items: center; gap: 4px; padding: 6px 8px; border: 1px solid var(--color5); border-radius: 6px; background: var(--color3); color: var(--color11); font-size: .83rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .session-set-completed-status { color: var(--color14); font-size: .78rem; font-weight: 700; white-space: nowrap; }
 @media(max-width:390px) { .session-set-completed { gap: 6px; padding-inline: 4px; } .session-set-metric { padding: 5px; font-size: .77rem; } .session-set-completed-status { font-size: .72rem; } }
+
+/* Titre unique de la page de récupération, en conservant la couleur bronze. */
+.timer-heading .timer-main-title { margin: 0 0 12px; font-size: clamp(2rem, 9vw, 3.25rem); line-height: 1.1; color: var(--color12); font-weight: 700; letter-spacing: .04em; }
