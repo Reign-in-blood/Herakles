@@ -80,9 +80,7 @@
     </section>
     <section id="rest-timer" class="timer-screen" hidden aria-labelledby="timer-title" data-timer-state="idle">
       <header class="timer-heading">
-        <p class="section-kicker">Récupération</p>
-        <h1 id="timer-title">Temps de repos</h1>
-        <p class="timer-intro">Un chrono rapide, lisible et fiable entre deux séries.</p>
+        <h1 id="timer-title" class="section-kicker timer-main-title">Récupération</h1>
       </header>
 
       <div class="preset-grid" id="timer-presets" aria-label="Durées rapides">
@@ -145,6 +143,14 @@
           <strong id="storage-status">Initialisation…</strong>
           <small id="session-count">—</small>
         </article>
+      </div>
+
+      <div class="update-block">
+        <p class="section-kicker">Mises à jour</p>
+        <p id="manual-update-status" class="update-status" role="status" aria-live="polite">Recherche automatique activée.</p>
+        <div class="update-actions">
+          <button id="check-update-button" class="button button-secondary" type="button">Rechercher une mise à jour</button>
+        </div>
       </div>
 
       <div class="update-block">
