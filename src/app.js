@@ -235,6 +235,7 @@ function initHome() {
     flow.hidden = screen !== "exercise";
     sessionPanel.hidden = screen !== "session";
     timer.hidden = screen !== "timer";
+    timerPresets.hidden = screen === "timer" && pendingSetIndex !== null;
     system.hidden = screen !== "settings";
     back.hidden = screen === "home";
     navHome.classList.toggle("is-current",screen === "home");
@@ -348,7 +349,7 @@ function initHome() {
   const sessionProgress = document.querySelector("#session-progress");
   const sessionElapsed = document.querySelector("#session-elapsed");
   const sessionFeedback = document.querySelector("#session-feedback");
-  const finishRestButton = document.querySelector("#finish-session-rest");
+  const timerPresets = document.querySelector("#timer-presets");
   const restTimer = initRestTimer({ onFinish: completeRest });
   function persistActiveSession() {
     if (!activeSession) { localStorage.removeItem(ACTIVE_KEY); return; }
@@ -431,7 +432,6 @@ function initHome() {
           pendingSetIndex = index;
           set.completed_at = new Date().toISOString();
           persistActiveSession();
-          finishRestButton.hidden = false;
           restTimer.start(activeSession.planned.rest_seconds);
           showScreen("timer");
         });
@@ -449,12 +449,10 @@ function initHome() {
     const set = activeSession.sets[pendingSetIndex];
     if (set) set.rest_seconds_actual = actualSeconds;
     pendingSetIndex = null;
-    finishRestButton.hidden = true;
     persistActiveSession();
     renderSession();
     showScreen("session");
   }
-  finishRestButton.addEventListener("click", () => restTimer.finish());
   async function finishSession() {
     if (!activeSession) return;
     const ended = new Date().toISOString();
@@ -467,7 +465,6 @@ function initHome() {
     try {
       await saveSession(record);
       activeSession = null; pendingSetIndex = null; persistActiveSession();
-      finishRestButton.hidden = true;
       showScreen("home");
       void initStorage();
       window.alert("Séance enregistrée sur cet appareil.");
