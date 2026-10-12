@@ -45,6 +45,29 @@
     </section>
     <button id="back-home-button" class="back-home-button" type="button" hidden>← Retour à l’accueil</button>
 
+    <section id="exercise-flow" class="exercise-flow" hidden aria-labelledby="exercise-flow-title">
+      <header class="flow-heading"><p class="section-kicker">Nouvelle séance</p><h1 id="exercise-flow-title">Choisir une catégorie</h1><p id="exercise-flow-intro">Sélectionne une zone à travailler aujourd’hui.</p></header>
+      <div id="category-list" class="choice-list"></div>
+      <div id="exercise-list" class="choice-list" hidden></div>
+      <button id="free-exercise-button" class="button button-secondary" type="button" hidden>+ Ajouter un exercice libre</button>
+      <form id="exercise-config" class="exercise-config" hidden>
+        <div class="exercise-selected"><strong id="selected-exercise-name">Exercice</strong><span id="selected-exercise-muscles"></span></div>
+        <div class="config-grid" id="strength-fields">
+          <label>Charge (kg)<input id="exercise-weight" type="number" min="0" step="0.5" value="0" inputmode="decimal"></label>
+          <label>Séries prévues<input id="exercise-sets" type="number" min="1" max="99" step="1" value="4" required></label>
+          <label>Répétitions prévues<input id="exercise-reps" type="number" min="1" max="999" step="1" value="10" required></label>
+          <label>Repos (secondes)<input id="exercise-rest" type="number" min="0" max="3600" step="15" value="120" required></label>
+        </div>
+        <div class="config-grid" id="cardio-fields" hidden>
+          <label>Durée (minutes)<input id="exercise-duration" type="number" min="1" max="1440" value="20"></label>
+          <label>Vitesse (km/h, facultatif)<input id="exercise-speed" type="number" min="0" step="0.1" inputmode="decimal"></label>
+          <label>Distance (km, facultatif)<input id="exercise-distance" type="number" min="0" step="0.01" inputmode="decimal"></label>
+          <label>Inclinaison (%, facultatif)<input id="exercise-incline" type="number" min="0" step="0.5" inputmode="decimal"></label>
+        </div>
+        <button class="button button-primary" type="submit">Commencer la séance →</button>
+      </form>
+      <p id="exercise-flow-message" class="flow-message" role="status" aria-live="polite"></p>
+    </section>
     <section id="rest-timer" class="timer-screen" hidden aria-labelledby="timer-title" data-timer-state="idle">
       <header class="timer-heading">
         <p class="section-kicker">Récupération</p>
