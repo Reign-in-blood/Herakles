@@ -170,8 +170,8 @@ function renderCompletedExercises() {
     !exerciseList.hidden
   );
 
-  section.hidden = !shouldShow;
-  nextExerciseTitle.hidden = !shouldShow;
+  if (section.hidden !== !shouldShow) section.hidden = !shouldShow;
+  if (nextExerciseTitle.hidden !== !shouldShow) nextExerciseTitle.hidden = !shouldShow;
   if (!shouldShow) return;
 
   const list = section.querySelector("#current-session-exercise-list");
@@ -229,7 +229,9 @@ function ensureFinishWorkoutButton() {
     !exerciseList.hidden
   );
 
-  finishWorkoutButton.hidden = !shouldShow;
+  if (finishWorkoutButton.hidden !== !shouldShow) {
+    finishWorkoutButton.hidden = !shouldShow;
+  }
   renderCompletedExercises();
 }
 
@@ -405,7 +407,10 @@ function ensureExerciseActions() {
     sessionPanel.append(abandonExerciseButton);
   }
 
-  abandonExerciseButton.hidden = !hasCurrentExercise || sessionPanel.hidden;
+  const shouldHideAbandon = !hasCurrentExercise || sessionPanel.hidden;
+  if (abandonExerciseButton.hidden !== shouldHideAbandon) {
+    abandonExerciseButton.hidden = shouldHideAbandon;
+  }
 
   if (exerciseRecap && !correctExerciseButton) {
     const actions = document.createElement("div");
