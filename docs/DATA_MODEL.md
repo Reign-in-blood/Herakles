@@ -215,9 +215,101 @@ Stocker les dates/heures en ISO 8601 avec fuseau, par exemple :
 2026-10-10T18:30:00+02:00
 ```
 
+## Profil local
+
+Le profil n'est pas un compte distant. Il représente les préférences et caractéristiques de l'utilisateur sur l'appareil.
+
+Le store IndexedDB `profile` contient actuellement un enregistrement unique :
+
+```text
+id = "local-user"
+schema_version = 1
+sex = "male" | "female"
+height_cm
+weekly_sessions_goal = 1..7
+goal
+    weight_loss
+    weight_gain
+    fitness
+    muscle_gain
+    strength
+    endurance
+target_weight_kg = nombre | null
+updated_at
+```
+
+`target_weight_kg` n'est pertinent que pour `weight_loss` et `weight_gain`.
+
+Le profil peut évoluer, mais une séance historique ne doit pas dépendre des valeurs actuelles du profil pour ses calculs historiques. La prochaine étape est donc d'ajouter un `user_snapshot` aux nouvelles séances.
+
+## Historique du poids
+
+Le poids est historisé séparément du profil dans le store IndexedDB `measurements` afin de ne pas écraser les valeurs précédentes.
+
+Format actuel :
+
+```text
+measurement
+├── id               ex. weight-2026-10-13
+├── schema_version = 1
+├── measured_at
+└── weight_kg
+```
+
+Une mesure enregistrée le même jour remplace la mesure de ce jour. Cela permet une saisie simple : au maximum un point de poids par journée dans le graphique actuel.
+
+Le graphique relie les mesures dans l'ordre chronologique. Pour un objectif `weight_loss`, l'objectif est atteint lorsque le dernier poids est inférieur ou égal à `target_weight_kg`. Pour `weight_gain`, il est atteint lorsque le dernier poids est supérieur ou égal à la cible. La ligne d'objectif passe alors de l'état erreur à l'état succès.
+
+## IndexedDB — version applicative
+
+La version IndexedDB est actuellement `2`. Elle est indépendante de `session.schema_version`.
+
+Stores persistants actuels :
+
+```text
+sessions
+profile
+settings
+measurements
+```
+
+`localStorage` reste réservé aux états temporaires nécessitant une restauration rapide, notamment la séance active et le chronomètre de récupération.
+
+## Export / import JSON
+
+Les Réglages permettent d'exporter une sauvegarde locale complète :
+
+```text
+herakles-backup-YYYY-MM-DD.json
+```
+
+Structure actuelle :
+
+```text
+backup
+├── schema_version = 1
+├── app = "Herakles"
+├── exported_at
+├── profile
+├── measurements[]
+├── sessions[]
+└── settings[]
+```
+
+L'import est actuellement un **merge par identifiant** : les éléments absents sont ajoutés et ceux ayant le même identifiant sont remplacés. Il ne supprime pas automatiquement les données locales absentes du fichier importé.
+
+Le format d'export doit rester versionné pour permettre une migration future avant toute synchronisation cloud.
+
+## Agenda
+
+L'agenda du profil n'est pas une nouvelle source de données : il lit directement les séances du store `sessions` et les positionne selon `started_at`. Les détails affichés doivent donc toujours être dérivables des séances enregistrées.
+
 ## Version du schéma
 
-- v1 : format historique initial ;
-- v2 : format actuel multi-exercices avec récapitulatif de séance.
+- v1 : format historique initial des séances ;
+- v2 : format actuel multi-exercices avec récapitulatif de séance ;
+- profil v1 : profil local actuel ;
+- mesure v1 : historique du poids actuel ;
+- backup v1 : export/import local actuel.
 
-Toute future modification incompatible doit augmenter `schema_version` et prévoir une migration explicite.
+Toute future modification incompatible doit augmenter le `schema_version` concerné et prévoir une migration explicite.
