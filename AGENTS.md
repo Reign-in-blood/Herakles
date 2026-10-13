@@ -4,11 +4,12 @@ Ce fichier est la référence de travail pour tout agent ou contributeur automat
 
 ## Règle prioritaire
 
-**Ta mémoire de contexte va être compressée réguliérement. maintiens donc réguliérement a jour :
-- 'AGENTS.md'
-- 'STYLE.md'
-- 'docs/DATA_MODEL.md
-- 'TODO.md'
+**Ta mémoire de contexte va être compressée régulièrement. Maintiens donc régulièrement à jour :**
+
+- `AGENTS.md`
+- `STYLE.md`
+- `docs/DATA_MODEL.md`
+- `TODO.md`
 
 Avant toute lecture approfondie, modification, création de fichier, commit ou PR : **lire `AGENTS.md` en premier** et respecter ses règles.
 
@@ -36,21 +37,17 @@ Après **chaque action effectuée sur le dépôt distant**, fournir au propriét
 
 ### Commandes à communiquer après une modification sur `develop`
 
-Si `develop` existe déjà en local :
-
 ```bash
 git switch develop
 git pull origin develop
 ```
 
-Si c'est la première récupération de `develop` sur la machine :
+Si c'est la première récupération de `develop` :
 
 ```bash
 git fetch origin
 git switch --track origin/develop
 ```
-
-Si une branche de fonctionnalité est utilisée, donner explicitement les commandes adaptées à cette branche et indiquer ensuite comment revenir sur `develop`.
 
 ## Objectif produit
 
@@ -58,16 +55,15 @@ Herakles est une application personnelle de suivi d'entraînement, pensée d'abo
 
 - simple et rapide pendant une séance ;
 - utilisable hors ligne ;
+- **local-first** ;
 - sans abonnement, publicité ni compte obligatoire ;
 - accessible comme site statique via GitHub Pages ;
-- installable sur Android comme **PWA (Progressive Web App)** ;
-- éventuellement empaquetable plus tard en APK Android (par exemple avec Capacitor) sans dépendre d'un app store.
+- installable sur Android comme PWA ;
+- éventuellement empaquetable plus tard en APK Android avec Capacitor.
 
 Les entraînements sont **spontanés** : Herakles ne doit pas imposer de planification ou de programme préalable pour commencer une séance.
 
 ## Flux produit de référence
-
-Le cheminement principal doit rester le suivant :
 
 ```text
 Créer / commencer une séance
@@ -94,121 +90,174 @@ Enregistrer et clôturer la séance complète
 Règles importantes :
 
 - une **séance** est le conteneur global ;
-- une séance contient **un ou plusieurs exercices réalisés successivement** ;
-- le thème/groupe est choisi au début de la séance et reste le contexte de sélection des exercices jusqu'à la fin de cette séance ;
-- après validation du récapitulatif d'un exercice, **ne pas revenir au choix des groupes** : revenir à la liste des exercices du thème actif ;
-- depuis cette liste, l'utilisateur peut soit lancer un autre exercice, soit **Terminer la séance** ;
-- terminer un exercice **ne termine pas la séance** ;
-- le chrono global de séance commence au démarrage de la séance et continue entre les exercices et pendant les récupérations ;
-- chaque exercice possède aussi son propre début, sa propre fin et sa propre durée ;
-- le bouton d'enregistrement du récapitulatif d'exercice ajoute l'exercice à la séance active puis revient au choix des exercices du thème actif ;
-- seul le flux explicite **Terminer la séance** clôt la séance et déclenche son récapitulatif global ;
-- les agrégats de séance (répétitions, volume, durée, calories estimées, nombre d'exercices) doivent être calculables depuis les exercices enregistrés.
+- une séance contient un ou plusieurs exercices réalisés successivement ;
+- le thème/groupe est choisi au début de la séance et reste le contexte de sélection jusqu'à la fin ;
+- après validation d'un exercice, revenir à la liste des exercices du thème actif, pas au choix des groupes ;
+- terminer un exercice ne termine pas la séance ;
+- seul **Terminer la séance** clôt la séance ;
+- le chrono global continue entre les exercices et pendant les récupérations ;
+- chaque exercice possède son propre début, sa propre fin et sa propre durée ;
+- les agrégats de séance doivent rester recalculables depuis les exercices enregistrés.
 
 ### Musculation pendant un exercice
 
 - chaque série possède ses propres répétitions et sa propre charge modifiable ;
-- le bouton de récupération placé après la première série non réalisée valide cette série puis lance son repos ;
+- la récupération valide la série courante puis lance son repos ;
 - à la fin du repos, retour automatique aux séries ;
-- une série terminée devient une ligne de lecture seule avec ses valeurs réelles ;
-- la dernière série conduit à **Terminer l'exercice**, puis au récapitulatif de l'exercice.
+- une série terminée devient une ligne de lecture seule ;
+- la dernière série conduit à **Terminer l'exercice**, puis au récapitulatif ;
+- l'exercice courant peut être corrigé ou abandonné sans perdre les exercices déjà enregistrés dans la séance.
 
 ### Chronomètre de repos
 
-Deux usages distincts doivent rester possibles :
+Deux usages distincts :
 
-1. récupération liée à une série : durée issue de l'exercice, démarrage immédiat, sans menu de presets ;
-2. futur chrono libre indépendant d'une séance : presets disponibles et fonctionnement autonome.
+1. récupération liée à une série : durée issue de l'exercice, démarrage immédiat, sans presets ;
+2. futur chrono libre indépendant d'une séance : presets disponibles.
+
+Le chrono doit utiliser des timestamps persistés pour survivre au rechargement et à l'arrière-plan.
+
+## Profil utilisateur local
+
+Le profil est **local et distinct d'un éventuel compte cloud futur**. L'application doit rester pleinement utilisable sans compte.
+
+Le profil actuel contient :
+
+- sexe : `male` / `female` ;
+- taille en cm ;
+- objectif de séances sur 7 jours (`1..7`) ;
+- objectif principal : perte de poids, prise de poids, remise en forme, prise de muscle, force ou endurance ;
+- poids cible uniquement pour perte/prise de poids.
+
+Le poids réel est historisé séparément dans IndexedDB afin de permettre un graphique dans le temps. Une saisie par jour suffit pour le modèle actuel.
+
+Pour un objectif de poids :
+
+- perte de poids : objectif atteint si le dernier poids est `<= target_weight_kg` ;
+- prise de poids : objectif atteint si le dernier poids est `>= target_weight_kg`.
+
+La ligne d'objectif du graphique utilise l'état erreur tant que la cible n'est pas atteinte et l'état succès lorsqu'elle l'est.
+
+Prochaine évolution prévue : ajouter un `user_snapshot` (poids/taille) à chaque nouvelle séance pour figer les données historiques utilisées dans les calculs, notamment les calories.
+
+## Agenda des séances
+
+L'agenda du profil est une vue dérivée du store `sessions`. Ne pas créer une deuxième source de vérité pour le calendrier : les jours occupés doivent être calculés depuis `session.started_at`.
+
+## Export / import
+
+Les Réglages proposent une sauvegarde JSON locale :
+
+```text
+herakles-backup-YYYY-MM-DD.json
+```
+
+Elle contient actuellement : profil, historique du poids, séances et réglages persistants.
+
+L'import actuel est un **merge par identifiant** : ajout des nouveaux éléments et remplacement des éléments portant le même identifiant. Ne pas supprimer implicitement les données locales absentes de la sauvegarde.
 
 ## Architecture actuelle
 
-Priorité à une architecture minimale, statique et durable :
-
-- `index.html` : coque et écrans de l'application ;
+- `index.html` : coque et écrans principaux ;
 - `src/styles.css` : styles globaux ;
-- `src/session.css` : styles spécifiques au suivi de séance ;
+- `src/session.css` : styles de séance ;
+- `src/profile.css` : styles profil, poids et agenda ;
 - `src/app.js` : navigation et logique principale ;
-- `src/session-flow.js` : maintien du thème actif, fin de séance et récapitulatif global ;
-- `src/exercises.js` : catalogue et catégories d'exercices ;
-- `src/rest-timer.js` : chronomètre de récupération ;
-- `src/notifications.js` : notifications liées au repos ;
+- `src/session-flow.js` : thème actif, reprise, fin de séance et récap global ;
+- `src/profile.js` : profil local, historique du poids, agenda, export/import ;
+- `src/exercises.js` : catalogue et catégories ;
+- `src/rest-timer.js` : récupération ;
+- `src/notifications.js` : notifications ;
 - `src/storage.js` : persistance IndexedDB ;
 - `manifest.webmanifest` : installation PWA ;
 - `sw.js` : cache/service worker ;
-- `data/schema/` : schémas versionnés des données ;
-- `data/examples/` : exemples fictifs, jamais de données personnelles réelles ;
-- `docs/` : décisions d'architecture et documentation.
+- `data/schema/` : schémas versionnés ;
+- `docs/DATA_MODEL.md` : modèle de données détaillé.
 
-Éviter un framework ou une chaîne de build tant qu'ils ne sont pas justifiés. Le site doit pouvoir fonctionner directement depuis GitHub Pages.
+Éviter framework ou chaîne de build tant qu'ils ne sont pas justifiés. Le site doit fonctionner directement depuis GitHub Pages.
 
 ## Données et confidentialité
 
-Herakles est **local-first** :
+Herakles est local-first :
 
 1. les données utilisateur sont stockées sur l'appareil ;
-2. une séance en cours doit pouvoir être restaurée après rafraîchissement ou fermeture accidentelle ;
-3. la séance terminée est persistée dans IndexedDB ;
-4. l'utilisateur devra pouvoir exporter/importer ses données en JSON ;
-5. aucune donnée personnelle ou de santé réelle ne doit être commitée dans ce dépôt public ;
-6. les exemples du dépôt doivent être fictifs/anonymisés ;
-7. tout format de données doit contenir un `schema_version` pour permettre les migrations futures.
+2. la séance active doit être restaurable après rafraîchissement/fermeture ;
+3. les séances terminées sont persistées dans IndexedDB ;
+4. profil et historique du poids sont persistés dans IndexedDB ;
+5. export/import JSON doit permettre une sauvegarde avant tout compte cloud ;
+6. aucune donnée personnelle ou de santé réelle ne doit être commitée dans le dépôt public ;
+7. les exemples du dépôt doivent être fictifs/anonymisés ;
+8. tout format durable doit contenir un `schema_version` lorsqu'une migration future est plausible.
 
 Le JSON est le format d'échange canonique. IndexedDB est le stockage applicatif local recommandé.
+
+### IndexedDB actuel
+
+Version applicative IndexedDB : `2`.
+
+Stores :
+
+```text
+sessions
+profile
+settings
+measurements
+```
+
+Ne pas confondre `DB_VERSION` d'IndexedDB avec `session.schema_version`.
+
+`localStorage` est réservé aux états temporaires à restaurer rapidement : séance active, thème actif, chrono, etc.
 
 ## Modèle de données — principes
 
 Une séance contient au minimum :
 
 - identifiant unique ;
-- thème/groupe actif lorsque cette information est pertinente pour le flux (`theme_id`) ;
-- date/heure de début et de fin ;
-- durée globale ;
-- snapshot optionnel des mensurations (`weight_kg`, `height_cm`) ;
-- liste ordonnée des exercices réalisés ;
-- résumé calculable de la séance ;
-- notes et indicateurs facultatifs.
+- thème/groupe actif lorsque pertinent ;
+- début, fin et durée globale ;
+- futur snapshot utilisateur ;
+- liste ordonnée des exercices ;
+- résumé recalculable ;
+- notes facultatives.
 
-Chaque exercice enregistré dans une séance contient au minimum :
+Chaque exercice enregistré contient au minimum :
 
-- identifiant/type/nom de l'exercice ;
-- date/heure de début et de fin ;
-- durée de l'exercice ;
-- données brutes propres au type d'exercice ;
-- résumé calculable de l'exercice.
+- identifiant/type/nom ;
+- début, fin et durée ;
+- données brutes propres au type ;
+- résumé calculable.
 
-Pour la musculation, les données brutes comprennent notamment les séries, répétitions, charges et repos. Pour le cardio, elles comprennent notamment durée, distance, vitesse/allure et inclinaison lorsqu'elles sont disponibles.
-
-Les valeurs calculées comme `volume_kg`, `exercise_volume_kg` ou `session_volume_kg` peuvent être mises en cache, mais doivent toujours pouvoir être recalculées à partir des données brutes.
+Les valeurs comme `volume_kg`, `exercise_volume_kg` ou `session_volume_kg` peuvent être mises en cache, mais doivent rester recalculables depuis les données brutes.
 
 ### Versionnement actuel des séances
 
-- `data/schema/session.schema.json` conserve le format historique v1 ;
-- `data/schema/session-v2.schema.json` décrit le format multi-exercices utilisé par le nouveau flux de séance ;
-- ne jamais réécrire silencieusement les anciennes séances v1 ; toute lecture historique doit accepter les versions encore supportées ou appliquer une migration explicite.
+- `data/schema/session.schema.json` : format historique v1 ;
+- `data/schema/session-v2.schema.json` : format multi-exercices actuel ;
+- ne jamais réécrire silencieusement les anciennes séances v1.
 
 ### Calories estimées
 
-Les calories ne sont qu'une **estimation**, jamais une donnée mesurée. Conserver si possible la méthode et les paramètres utilisés pour permettre un recalcul ultérieur.
+Les calories sont une estimation, jamais une mesure.
 
-Pour une première approximation, une formule MET peut être utilisée :
+Formule provisoire possible :
 
 ```text
 kcal = MET × 3.5 × weight_kg / 200 × duration_minutes
 ```
 
-Ne pas présenter cette estimation comme précise. Lorsque le profil utilisateur contiendra un poids réel, utiliser un snapshot de ce poids au moment de la séance plutôt qu'une valeur de référence fixe.
+Lorsque le profil contient un poids réel, utiliser à terme le poids figé dans le snapshot de séance plutôt qu'une référence générique.
 
 ### Charges machine
 
-Ne pas mélanger les notions suivantes :
+Ne pas mélanger :
 
-- poids ajouté (`plates_total_kg`) ;
-- poids ajouté par côté (`plates_per_side_kg`) ;
-- résistance de départ de la machine (`machine_base_resistance_kg`) ;
-- charge nominale totale (`nominal_load_kg`) ;
-- poids du corps (`body_weight_kg`).
+- `plates_total_kg` ;
+- `plates_per_side_kg` ;
+- `machine_base_resistance_kg` ;
+- `nominal_load_kg` ;
+- `body_weight_kg`.
 
-Le poids du corps ne doit pas être automatiquement ajouté à la charge nominale d'une machine. Il reste une donnée séparée sauf modèle biomécanique explicitement défini.
+Le poids du corps reste séparé sauf modèle biomécanique explicitement défini.
 
 ## Types d'exercices
 
@@ -216,39 +265,28 @@ Prévoir au moins :
 
 - `strength` : séries, répétitions, charge, repos ;
 - `cardio` : durée, distance, dénivelé, vitesse/allure, inclinaison ;
-- extensible plus tard à d'autres types sans casser les anciennes données.
-
-## Chronomètre de repos
-
-Le chrono est une fonctionnalité centrale :
-
-- démarrage rapide après validation d'une série ;
-- durée par défaut configurable par exercice ;
-- temps prévu et temps réellement pris conservés séparément ;
-- fonctionnement fiable écran allumé ou application en arrière-plan autant que les APIs web le permettent ;
-- reprise correcte après rafraîchissement/rechargement en stockant un timestamp de fin, pas seulement un compteur décrémenté.
+- extensible plus tard sans casser les anciennes données.
 
 ## Compatibilité GitHub Pages / PWA
 
-- utiliser des chemins relatifs compatibles avec un sous-chemin tel que `/Herakles/` ;
-- ne pas supposer que l'application est servie à la racine d'un domaine ;
+- utiliser des chemins relatifs compatibles avec `/Herakles/` ;
+- ne pas supposer que l'application est servie à la racine ;
 - la PWA doit rester utilisable hors ligne après une première visite ;
-- le service worker doit être versionné et son cache facile à invalider ;
-- toute nouvelle ressource nécessaire hors ligne doit être ajoutée au cache applicatif.
+- toute nouvelle ressource nécessaire hors ligne doit être ajoutée au cache ;
+- incrémenter le cache du service worker après modification de ressources applicatives mises en cache.
 
 ## Qualité
 
 Pour chaque modification significative :
 
-- garder l'interface utilisable sur téléphone en priorité ;
+- garder l'interface mobile-first ;
 - éviter les dépendances inutiles ;
 - ne pas casser les anciennes données sans migration ;
 - documenter toute évolution du schéma ;
-- vérifier que les fichiers JSON restent valides ;
-- privilégier des unités explicites dans les noms de champs (`_kg`, `_cm`, `_seconds`, `_km`, `_m`).
+- privilégier des unités explicites (`_kg`, `_cm`, `_seconds`, `_km`, `_m`).
 
 ## Style produit
 
-Identité visuelle : **Herakles**, ambiance grecque sobre. Pas de surcharge décorative ; la lisibilité pendant l'entraînement prime.
+Identité visuelle : **Herakles**, ambiance grecque sobre. La lisibilité pendant l'entraînement prime.
 
-Consulter également `STYLE.md` avant toute modification visuelle importante.
+Consulter `STYLE.md` avant toute modification visuelle importante.
