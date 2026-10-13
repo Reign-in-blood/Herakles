@@ -37,6 +37,7 @@ function runRequest(storeName, mode, action) {
   return openDatabase().then((db) => new Promise((resolve, reject) => {
     const transaction = db.transaction(storeName, mode);
     const store = transaction.objectStore(storeName);
+    let result;
     let request;
 
     try {
@@ -48,15 +49,26 @@ function runRequest(storeName, mode, action) {
     }
 
     if (request) {
-      request.onsuccess = () => resolve(request.result);
+      request.onsuccess = () => {
+        result = request.result;
+      };
       request.onerror = () => reject(request.error);
-    } else {
-      transaction.oncomplete = () => resolve(undefined);
     }
 
-    transaction.oncomplete = () => db.close();
-    transaction.onerror = () => reject(transaction.error);
-    transaction.onabort = () => reject(transaction.error || new Error("Transaction annulée"));
+    transaction.oncomplete = () => {
+      db.close();
+      resolve(result);
+    };
+    transaction.onerror = () => {
+      const error = transaction.error;
+      db.close();
+      reject(error);
+    };
+    transaction.onabort = () => {
+      const error = transaction.error || new Error("Transaction annulée");
+      db.close();
+      reject(error);
+    };
   }));
 }
 
