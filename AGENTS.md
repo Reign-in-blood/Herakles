@@ -4,6 +4,12 @@ Ce fichier est la référence de travail pour tout agent ou contributeur automat
 
 ## Règle prioritaire
 
+**Ta mémoire de contexte va être compressée réguliérement. maintiens donc réguliérement a jour :
+- 'AGENTS.md'
+- 'STYLE.md'
+- 'docs/DATA_MODEL.md
+- 'TODO.md'
+
 Avant toute lecture approfondie, modification, création de fichier, commit ou PR : **lire `AGENTS.md` en premier** et respecter ses règles.
 
 ## Contexte utilisateur
