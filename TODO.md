@@ -1,20 +1,36 @@
 # TODO Herakles
 
-## Priorité actuelle — terminer le flux de séance
+## Flux de séance — à fiabiliser
 
-- [ ] Finaliser le conteneur de **séance active** capable d'accumuler plusieurs exercices successifs.
-- [ ] Vérifier que l'enregistrement d'un récapitulatif d'exercice ajoute uniquement cet exercice à la séance active et retourne au choix des exercices.
-- [ ] Ajouter une action explicite **Terminer la séance**, distincte de **Terminer l'exercice**.
-- [ ] Créer le récapitulatif global de séance : durée totale, nombre d'exercices, séries, répétitions, volume total et calories estimées.
-- [ ] Enregistrer dans IndexedDB la séance complète avec tous ses exercices dans leur ordre réel.
-- [ ] Garantir la restauration d'une séance active et de ses exercices déjà validés après rafraîchissement/fermeture accidentelle.
-- [ ] Faire évoluer `data/schema/session.schema.json` pour stocker proprement la durée et le résumé de chaque exercice, avec migration si le changement devient incompatible avec le schéma v1.
+- [x] Séance active multi-exercices avec retour au thème choisi.
+- [x] Action explicite **Terminer la séance** et récapitulatif global.
+- [x] Enregistrement de la séance complète dans IndexedDB.
+- [x] Restauration de la séance active après rafraîchissement/fermeture dans les principaux états.
+- [x] Abandon/correction de l'exercice courant et récapitulatif des exercices déjà réalisés.
+- [ ] Continuer les tests réels de reprise : série en cours, récupération, récap exercice et sélection entre deux exercices.
+- [ ] Ajouter une correction d'un exercice déjà enregistré dans la séance si le besoin se confirme.
 
-## Données et statistiques
+## Profil et données locales
 
+- [x] Profil local : homme/femme, taille, objectif de séances sur 7 jours et objectif principal.
+- [x] Historique du poids daté dans IndexedDB.
+- [x] Graphique de poids avec objectif de poids pour perte/prise et état atteint en vert.
+- [x] Agenda mensuel alimenté par les séances enregistrées.
+- [x] Export/import JSON depuis les Réglages.
+- [ ] Ajouter un `user_snapshot` (poids/taille) aux nouvelles séances au moment de leur démarrage.
+- [ ] Utiliser le poids réel du profil/snapshot dans l'estimation des calories au lieu de la référence provisoire.
+- [ ] Décider si d'autres mesures sont utiles : tour de taille, masse grasse, etc., sans surcharger le profil.
+
+## Historique et statistiques
+
+- [ ] Créer l'écran **Entraînements** avec la liste et le détail des séances enregistrées.
 - [ ] Remplacer progressivement les statistiques fictives de l'accueil par les données réelles IndexedDB.
-- [ ] Ajouter le poids utilisateur au profil afin d'améliorer l'estimation des calories et conserver un snapshot dans la séance.
-- [ ] Prévoir export/import JSON des séances.
+- [ ] Utiliser l'objectif de séances / 7 jours dans le tableau de bord.
+
+## Plus tard — synchronisation / compte facultatif
+
+- [ ] Évaluer une sauvegarde cloud facultative après stabilisation du modèle local.
+- [ ] Garder Herakles utilisable intégralement sans compte et hors ligne.
 
 ## Plus tard — compteur de pas Android
 
@@ -23,4 +39,4 @@
 - [ ] Évaluer une intégration native avec Capacitor / APK : la PWA ne peut pas accéder directement aux données système de pas.
 - [ ] Prévoir le stockage local des pas par jour, avec date, source et version de schéma.
 
-Statut : le compteur de pas reste une idée secondaire ; la priorité est le cycle complet séance → exercices → fin de séance.
+Statut : la priorité actuelle est la fiabilité des données locales, du profil et de la reprise de séance avant d'ajouter un compte cloud.
