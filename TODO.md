@@ -12,8 +12,9 @@
 
 ## Cardio machines
 
-- [x] Démarrer un exercice cardio machine immédiatement après sa sélection, sans configuration préalable.
-- [x] Chronométrer l'exercice depuis son timestamp `started_at` et conserver la reprise après rechargement.
+- [x] Ouvrir directement l'écran de l'exercice cardio après sa sélection, sans formulaire ni page intermédiaire.
+- [x] Afficher le chrono à `00:00:00` et **Démarrer l'exercice** sur ce même écran ; créer `started_at` uniquement au clic.
+- [x] Chronométrer ensuite l'exercice depuis son timestamp `started_at` et conserver la reprise après rechargement.
 - [x] Figer la durée lors de **Terminer l'exercice** puis demander la distance parcourue.
 - [x] Calculer automatiquement la vitesse moyenne depuis la distance et la durée réelles.
 - [x] Permettre une inclinaison moyenne facultative pour le tapis de course.
