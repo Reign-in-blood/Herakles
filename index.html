@@ -16,7 +16,7 @@
     <header class="app-header home-header">
       <div class="brand-lockup"><div class="brand-mark" aria-hidden="true">❧</div><strong class="brand-title">Herakles</strong></div>
       <button id="install-button" class="icon-button" type="button" hidden>Installer</button>
-      <button class="profile-button" type="button" aria-label="Profil (à venir)" data-placeholder-nav="Profil">♙</button>
+      <button class="profile-button" type="button" aria-label="Profil utilisateur" data-placeholder-nav="Profil">♙</button>
     </header>
     <div class="greek-rule" aria-hidden="true"></div>
 
@@ -32,16 +32,16 @@
         <button class="period-tab" data-period="84" aria-pressed="false" type="button">12 semaines</button>
       </div>
       <section class="activity-section" aria-labelledby="activity-title">
-        <div class="section-title-line"><h1 id="activity-title">Activité d’entraînement</h1><span class="demo-label">Aperçu fictif</span></div>
-        <div id="activity-chart" class="activity-chart" role="img" aria-label="Graphique de démonstration de la durée des entraînements"></div>
+        <div class="section-title-line"><h1 id="activity-title">Activité d’entraînement</h1><span class="demo-label">Données enregistrées</span></div>
+        <div id="activity-chart" class="activity-chart" role="img" aria-label="Durée des entraînements enregistrés"></div>
       </section>
       <div class="dashboard-grid">
-        <article class="dashboard-card"><span class="dashboard-icon" aria-hidden="true">⚊</span><div><strong>4</strong><span>séances</span><small>sur 7 jours</small></div></article>
-        <article class="dashboard-card"><span class="dashboard-icon" aria-hidden="true">◷</span><div><strong>3 h 42</strong><span>durée totale</span><small>+28 % vs semaine préc.</small></div></article>
-        <article class="dashboard-card"><span class="dashboard-icon" aria-hidden="true">▥</span><div><strong>+12 %</strong><span>progression</span><small>sur les charges</small></div></article>
-        <article class="dashboard-card"><span class="dashboard-icon" aria-hidden="true">♨</span><div><span>Calories estimées</span><strong>420 <em>kcal</em></strong></div></article>
-        <article class="dashboard-card"><span class="dashboard-icon" aria-hidden="true">▥</span><div><span>Volume total</span><strong>12 450 <em>kg</em></strong></div></article>
-        <article class="dashboard-card"><span class="dashboard-icon" aria-hidden="true">⚊</span><div><span>Exercices réalisés</span><strong>6</strong></div></article>
+        <article class="dashboard-card"><span class="dashboard-icon" aria-hidden="true">⚊</span><div><strong>0</strong><span>séances</span><small>sur 7 jours</small></div></article>
+        <article class="dashboard-card"><span class="dashboard-icon" aria-hidden="true">◷</span><div><strong>0 min</strong><span>durée totale</span><small>aucune activité</small></div></article>
+        <article class="dashboard-card"><span class="dashboard-icon" aria-hidden="true">▥</span><div><strong>—</strong><span>progression</span><small>pas assez d’historique de charge</small></div></article>
+        <article class="dashboard-card"><span class="dashboard-icon" aria-hidden="true">♨</span><div><span>Calories estimées</span><strong>0 <em>kcal</em></strong></div></article>
+        <article class="dashboard-card"><span class="dashboard-icon" aria-hidden="true">▥</span><div><span>Volume total</span><strong>0 <em>kg</em></strong></div></article>
+        <article class="dashboard-card"><span class="dashboard-icon" aria-hidden="true">⚊</span><div><span>Exercices réalisés</span><strong>0</strong></div></article>
       </div>
     </section>
     <button id="back-home-button" class="back-home-button" type="button" hidden>← Retour à l’accueil</button>
@@ -186,5 +186,6 @@
   <script type="module" src="./src/app.js"></script>
   <script type="module" src="./src/session-flow.js"></script>
   <script type="module" src="./src/profile.js"></script>
+  <script type="module" src="./src/home-dashboard.js"></script>
 </body>
 </html>
