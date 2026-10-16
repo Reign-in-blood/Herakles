@@ -15,6 +15,11 @@ const navHome = document.querySelector('[data-nav="home"]');
 const navSettings = document.querySelector('[data-nav="settings"]');
 const startWorkoutButton = document.querySelector("#start-workout-button");
 const systemPanel = document.querySelector("#system-panel");
+const TEMPORARY_WORKOUT_KEYS = [
+  "herakles.activeSession.v1",
+  "herakles.sessionCategory.v1",
+  "herakles.restTimer.v1"
+];
 
 const GOAL_LABELS = {
   weight_loss: "Perte de poids",
@@ -57,6 +62,15 @@ function localDateKey(value = new Date()) {
 
 function formatShortDate(value) {
   return new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "2-digit" }).format(new Date(value));
+}
+
+function clearTemporaryWorkoutState() {
+  try {
+    TEMPORARY_WORKOUT_KEYS.forEach((key) => localStorage.removeItem(key));
+    sessionStorage.removeItem("herakles.sessionDraft.v1");
+  } catch (error) {
+    console.warn("Temporary workout state could not be cleared after restore", error);
+  }
 }
 
 function createProfileScreen() {
@@ -539,13 +553,17 @@ function setupBackupControls() {
     try {
       status.textContent = "Lecture de la sauvegarde…";
       const backup = JSON.parse(await file.text());
-      if (!window.confirm("Importer cette sauvegarde ? Les éléments portant le même identifiant seront remplacés.")) {
+      const confirmed = window.confirm(
+        "Restaurer cette sauvegarde ? Les données locales actuelles (profil, poids, séances et réglages) seront remplacées par le contenu du fichier."
+      );
+      if (!confirmed) {
         event.target.value = "";
         status.textContent = "Import annulé.";
         return;
       }
       await importBackup(backup);
-      status.textContent = "Données importées. Actualisation…";
+      clearTemporaryWorkoutState();
+      status.textContent = "Sauvegarde restaurée. Actualisation…";
       window.setTimeout(() => window.location.reload(), 400);
     } catch (error) {
       console.error("Backup import failed", error);
