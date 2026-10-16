@@ -199,7 +199,9 @@ herakles-backup-YYYY-MM-DD.json
 
 Elle contient actuellement : profil, historique du poids, séances et réglages persistants.
 
-L'import actuel est un **merge par identifiant** : ajout des nouveaux éléments et remplacement des éléments portant le même identifiant. Ne pas supprimer implicitement les données locales absentes de la sauvegarde.
+L'import d'un backup est une **restauration complète**, pas un merge : après validation, `profile`, `measurements`, `sessions` et `settings` sont remplacés atomiquement par le contenu exact du fichier. Les données locales absentes du backup doivent être supprimées. Après succès, effacer aussi les états temporaires de séance afin qu'une ancienne séance locale ne se mélange pas à la sauvegarde restaurée.
+
+Ne jamais réintroduire un merge silencieux dans l'action de restauration. Si un import partiel/fusion est ajouté plus tard, il doit être une fonctionnalité distincte, explicitement nommée et confirmée par l'utilisateur.
 
 ## Architecture actuelle
 
