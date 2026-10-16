@@ -23,9 +23,12 @@
 
 ## Historique et statistiques
 
+- [x] Remplacer les statistiques fictives de l'accueil par les séances réellement enregistrées dans IndexedDB.
+- [x] Alimenter les périodes **7 jours / 30 jours / 12 semaines** avec les données réelles.
+- [x] Utiliser l'objectif de séances / 7 jours du profil dans le tableau de bord.
+- [x] Calculer les six cartes d'accueil depuis les données enregistrées : séances, durée, évolution de charge moyenne, calories estimées, volume et exercices.
 - [ ] Créer l'écran **Entraînements** avec la liste et le détail des séances enregistrées.
-- [ ] Remplacer progressivement les statistiques fictives de l'accueil par les données réelles IndexedDB.
-- [ ] Utiliser l'objectif de séances / 7 jours dans le tableau de bord.
+- [ ] Affiner si nécessaire la métrique de progression des charges après davantage de données réelles.
 
 ## Plus tard — synchronisation / compte facultatif
 
