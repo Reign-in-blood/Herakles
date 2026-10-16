@@ -1,4 +1,4 @@
-const CACHE_NAME = "herakles-shell-v21";
+const CACHE_NAME = "herakles-shell-v22";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -15,7 +15,8 @@ const APP_SHELL = [
   "./src/rest-timer.js",
   "./src/storage.js",
   "./assets/icons/herakles.svg",
-  "./assets/Pattern-frame.svg"
+  "./assets/Pattern-frame.svg",
+  "./assets/general/H_BG_01.webp"
 ];
 
 self.addEventListener("install", (event) => {
