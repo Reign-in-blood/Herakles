@@ -18,7 +18,8 @@ Herakles est conçu pour des entraînements spontanés, sans planification oblig
 ```text
 Commencer une séance
 → choisir un exercice
-→ configurer la musculation ou démarrer immédiatement un cardio machine
+→ configurer la musculation ou ouvrir directement l'écran d'un cardio machine
+→ démarrer explicitement le cardio depuis son écran
 → réaliser l'exercice
 → consulter son récapitulatif
 → enregistrer l'exercice dans la séance active
@@ -37,7 +38,7 @@ Le socle PWA et une grande partie du parcours d'entraînement sont en place :
 - accueil mobile avec navigation ;
 - sélection par catégories et catalogue d'exercices ;
 - configuration des exercices de musculation ;
-- cardio machine à départ immédiat pour tapis de course, rameur, vélo et vélo elliptique ;
+- cardio machine pour tapis de course, rameur, vélo et vélo elliptique, avec chrono à `00:00:00` et bouton **Démarrer l'exercice** sur le même écran ;
 - chrono propre au cardio, durée figée à la fin, saisie de la distance puis calcul automatique de la vitesse moyenne ;
 - inclinaison moyenne facultative pour le tapis de course ;
 - gestion des séries avec répétitions et charges modifiables ;
@@ -95,11 +96,11 @@ La hiérarchie métier est :
 séance → exercices[] → données propres à chaque exercice
 ```
 
-Les totaux de séance doivent être recalculables depuis les données des exercices et de leurs séries ou mesures cardio.
+Les totaux de séance doivent être recalculables depuis les données des exercices et de leurs séries.
 
 Voir :
 
 - `AGENTS.md` pour les règles de développement et le flux produit de référence ;
 - `docs/DATA_MODEL.md` pour la structure des données ;
-- `data/schema/session-v2.schema.json` pour le schéma JSON multi-exercices actuel ;
+- `data/schema/session.schema.json` pour le schéma JSON actuel ;
 - `TODO.md` pour les prochaines priorités.
