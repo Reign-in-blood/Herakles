@@ -7,6 +7,7 @@
 - [x] Enregistrement de la séance complète dans IndexedDB.
 - [x] Restauration de la séance active après rafraîchissement/fermeture dans les principaux états.
 - [x] Abandon/correction de l'exercice courant et récapitulatif des exercices déjà réalisés.
+- [x] Signaler clairement une séance active sur l'accueil avec **Reprendre la séance** jusqu'à sa clôture et son enregistrement final.
 - [ ] Continuer les tests réels de reprise : série en cours, récupération, récap exercice et sélection entre deux exercices.
 - [ ] Ajouter une correction d'un exercice déjà enregistré dans la séance si le besoin se confirme.
 
