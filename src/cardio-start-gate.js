@@ -9,99 +9,126 @@ function isCardioChoice(button) {
   return Boolean(typeLabel);
 }
 
-function closePreparation({ restoreList = true } = {}) {
+function formatElapsed(ms) {
+  const seconds = Math.max(0, Math.floor(ms / 1000));
+  return [
+    Math.floor(seconds / 3600),
+    Math.floor(seconds / 60) % 60,
+    seconds % 60
+  ].map((value) => String(value).padStart(2, "0")).join(":");
+}
+
+function getActiveSessionStartedAt() {
+  try {
+    const session = JSON.parse(localStorage.getItem("herakles.activeSession.v1"));
+    return session?.started_at || null;
+  } catch (error) {
+    console.warn("Active session could not be read before cardio start", error);
+    return null;
+  }
+}
+
+function showExerciseList() {
+  const flow = document.querySelector("#exercise-flow");
+  const sessionPanel = document.querySelector("#session-panel");
+  const backButton = document.querySelector("#back-home-button");
+
+  if (sessionPanel) sessionPanel.hidden = true;
+  if (flow) flow.hidden = false;
+  if (backButton) backButton.hidden = false;
+  window.scrollTo(0, 0);
+}
+
+function clearPreparation({ restoreList = false } = {}) {
   if (!activePreparation) return;
 
-  const {
-    panel,
-    exerciseList,
-    freeButton,
-    flowTitle,
-    flowIntro,
-    previousTitle,
-    previousIntro,
-    previousListHidden,
-    previousFreeHidden
-  } = activePreparation;
-
-  panel.remove();
+  const { button } = activePreparation;
+  activePreparation = null;
 
   if (restoreList) {
-    exerciseList.hidden = previousListHidden;
-    freeButton.hidden = previousFreeHidden;
-    flowTitle.textContent = previousTitle;
-    flowIntro.textContent = previousIntro;
+    showExerciseList();
+    button.focus();
   }
-
-  activePreparation = null;
 }
 
 function showPreparation(button) {
-  closePreparation();
+  clearPreparation();
 
-  const exerciseList = document.querySelector("#exercise-list");
-  const freeButton = document.querySelector("#free-exercise-button");
-  const flowTitle = document.querySelector("#exercise-flow-title");
-  const flowIntro = document.querySelector("#exercise-flow-intro");
+  const home = document.querySelector("#home-screen");
+  const flow = document.querySelector("#exercise-flow");
+  const sessionPanel = document.querySelector("#session-panel");
+  const exerciseRecap = document.querySelector("#exercise-recap");
+  const restTimer = document.querySelector("#rest-timer");
+  const systemPanel = document.querySelector("#system-panel");
+  const sessionRecap = document.querySelector("#session-recap");
+  const backButton = document.querySelector("#back-home-button");
+  const navHome = document.querySelector('[data-nav="home"]');
+  const navSettings = document.querySelector('[data-nav="settings"]');
+  const sessionTitle = document.querySelector("#session-exercise-title");
+  const sessionElapsed = document.querySelector("#session-elapsed");
+  const sessionProgress = document.querySelector("#session-progress");
+  const sessionSets = document.querySelector("#session-sets");
+  const sessionFeedback = document.querySelector("#session-feedback");
   const exerciseName = button.querySelector(".choice-details strong")?.textContent?.trim() || "Cardio";
 
-  if (!exerciseList || !freeButton || !flowTitle || !flowIntro) return;
+  if (!flow || !sessionPanel || !sessionTitle || !sessionElapsed || !sessionProgress || !sessionSets) return;
 
-  const panel = document.createElement("section");
-  panel.id = "cardio-start-ready";
-  panel.className = "session-set-card";
-  panel.setAttribute("aria-labelledby", "cardio-start-ready-title");
+  activePreparation = { button };
 
-  const heading = document.createElement("strong");
-  heading.id = "cardio-start-ready-title";
-  heading.textContent = "Prêt à démarrer";
+  if (home) home.hidden = true;
+  flow.hidden = true;
+  sessionPanel.hidden = false;
+  if (exerciseRecap) exerciseRecap.hidden = true;
+  if (restTimer) restTimer.hidden = true;
+  if (systemPanel) systemPanel.hidden = true;
+  if (sessionRecap) sessionRecap.hidden = true;
+  if (backButton) backButton.hidden = false;
 
-  const message = document.createElement("p");
-  message.className = "flow-message";
-  message.textContent = "Le chronomètre de l’exercice démarrera uniquement lorsque tu appuieras sur le bouton ci-dessous.";
+  navHome?.classList.remove("is-current");
+  navSettings?.classList.remove("is-current");
+  navHome?.removeAttribute("aria-current");
+  navSettings?.removeAttribute("aria-current");
+
+  sessionTitle.textContent = exerciseName;
+  sessionProgress.textContent = "Prêt à démarrer";
+  if (sessionFeedback) sessionFeedback.textContent = "";
+
+  const sessionStartedAt = getActiveSessionStartedAt();
+  sessionElapsed.textContent = sessionStartedAt
+    ? formatElapsed(Date.now() - new Date(sessionStartedAt).getTime())
+    : "00:00:00";
+
+  sessionSets.replaceChildren();
+
+  const liveCard = document.createElement("div");
+  liveCard.className = "cardio-live-card";
+
+  const liveLabel = document.createElement("span");
+  liveLabel.className = "cardio-live-label";
+  liveLabel.textContent = "Durée de l’exercice";
+
+  const liveTime = document.createElement("strong");
+  liveTime.id = "cardio-exercise-elapsed";
+  liveTime.className = "cardio-live-time";
+  liveTime.textContent = "00:00:00";
+
+  const liveHint = document.createElement("small");
+  liveHint.textContent = "Le chrono démarre uniquement lorsque tu lances l’exercice.";
 
   const startButton = document.createElement("button");
   startButton.type = "button";
-  startButton.className = "button button-primary";
+  startButton.className = "button button-primary cardio-finish-button";
   startButton.textContent = "Démarrer l’exercice";
 
-  const cancelButton = document.createElement("button");
-  cancelButton.type = "button";
-  cancelButton.className = "button button-secondary";
-  cancelButton.textContent = "Retour aux exercices";
-
-  const previousTitle = flowTitle.textContent;
-  const previousIntro = flowIntro.textContent;
-  const previousListHidden = exerciseList.hidden;
-  const previousFreeHidden = freeButton.hidden;
-
-  activePreparation = {
-    panel,
-    exerciseList,
-    freeButton,
-    flowTitle,
-    flowIntro,
-    previousTitle,
-    previousIntro,
-    previousListHidden,
-    previousFreeHidden
-  };
-
-  flowTitle.textContent = exerciseName;
-  flowIntro.textContent = "Aucune donnée n’est demandée avant le départ.";
-  exerciseList.hidden = true;
-  freeButton.hidden = true;
-
   startButton.addEventListener("click", () => {
-    closePreparation({ restoreList: false });
+    activePreparation = null;
     bypassButtons.add(button);
     button.click();
   });
 
-  cancelButton.addEventListener("click", () => closePreparation());
-
-  panel.append(heading, message, startButton, cancelButton);
-  exerciseList.insertAdjacentElement("afterend", panel);
+  liveCard.append(liveLabel, liveTime, liveHint);
+  sessionSets.append(liveCard, startButton);
+  window.scrollTo(0, 0);
   startButton.focus();
 }
 
@@ -110,12 +137,12 @@ document.addEventListener("click", (event) => {
   if (backButton && activePreparation) {
     event.preventDefault();
     event.stopImmediatePropagation();
-    closePreparation();
+    clearPreparation({ restoreList: true });
     return;
   }
 
   if (activePreparation && event.target.closest("[data-nav]")) {
-    closePreparation();
+    clearPreparation();
     return;
   }
 
