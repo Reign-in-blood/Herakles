@@ -140,6 +140,31 @@ La ligne d'objectif du graphique utilise l'état erreur tant que la cible n'est 
 
 Prochaine évolution prévue : ajouter un `user_snapshot` (poids/taille) à chaque nouvelle séance pour figer les données historiques utilisées dans les calculs, notamment les calories.
 
+## Tableau de bord d'accueil
+
+Le tableau de bord d'accueil est une **vue dérivée** des séances terminées du store IndexedDB `sessions`. Ne jamais créer une deuxième source de vérité pour ces statistiques.
+
+Périodes disponibles :
+
+- `7 jours` : 7 jours calendaires incluant aujourd'hui ; graphique par jour ;
+- `30 jours` : 30 jours calendaires incluant aujourd'hui ; graphique regroupé par blocs de 5 jours ;
+- `12 semaines` : 84 jours calendaires incluant aujourd'hui ; graphique regroupé par blocs de 14 jours.
+
+Les six cartes d'accueil sont calculées depuis les séances de la période sélectionnée :
+
+1. nombre de séances ;
+2. durée totale ;
+3. évolution de la charge moyenne par série par rapport à la période précédente de même durée ;
+4. calories estimées stockées dans les séances ;
+5. volume total ;
+6. nombre total d'exercices réalisés.
+
+Pour `7 jours`, la première carte affiche également l'objectif `weekly_sessions_goal` du profil lorsqu'il existe.
+
+Les comparaisons utilisent toujours la période immédiatement précédente de même durée. Si les données de charge sont insuffisantes, afficher un état neutre plutôt qu'inventer une progression.
+
+La logique réelle du tableau de bord est dans `src/home-dashboard.js`. L'ancien jeu `chartData` fictif encore présent dans `src/app.js` est historique et ne doit plus être utilisé comme source de données ; le supprimer lors d'un prochain nettoyage ciblé de `app.js`.
+
 ## Agenda des séances
 
 L'agenda du profil est une vue dérivée du store `sessions`. Ne pas créer une deuxième source de vérité pour le calendrier : les jours occupés doivent être calculés depuis `session.started_at`.
@@ -165,6 +190,7 @@ L'import actuel est un **merge par identifiant** : ajout des nouveaux éléments
 - `src/app.js` : navigation et logique principale ;
 - `src/session-flow.js` : thème actif, reprise, fin de séance et récap global ;
 - `src/profile.js` : profil local, historique du poids, agenda, export/import ;
+- `src/home-dashboard.js` : statistiques réelles de l'accueil depuis IndexedDB ;
 - `src/exercises.js` : catalogue et catégories ;
 - `src/rest-timer.js` : récupération ;
 - `src/notifications.js` : notifications ;
