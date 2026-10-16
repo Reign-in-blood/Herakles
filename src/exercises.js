@@ -1,3 +1,5 @@
+import "./cardio-start-gate.js";
+
 export const CATEGORIES = [
   { id: "dos", name: "Dos", symbol: "Δ" },
   { id: "jambes", name: "Jambes", symbol: "Λ" },
