@@ -149,10 +149,40 @@ export async function exportAllData() {
   };
 }
 
-export async function importBackup(backup) {
+function isPlainRecord(value) {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function validateBackup(backup) {
   if (!backup || backup.app !== "Herakles" || backup.schema_version !== 1) {
     throw new Error("Sauvegarde Herakles non reconnue");
   }
+
+  if (!Object.prototype.hasOwnProperty.call(backup, "profile") || (backup.profile !== null && !isPlainRecord(backup.profile))) {
+    throw new Error("Profil de sauvegarde invalide");
+  }
+
+  for (const key of ["measurements", "sessions", "settings"]) {
+    if (!Array.isArray(backup[key])) {
+      throw new Error(`Collection de sauvegarde invalide : ${key}`);
+    }
+  }
+
+  if (backup.measurements.some((item) => !isPlainRecord(item) || typeof item.id !== "string" || !item.id)) {
+    throw new Error("Historique de poids invalide");
+  }
+
+  if (backup.sessions.some((item) => !isPlainRecord(item) || typeof item.id !== "string" || !item.id)) {
+    throw new Error("Historique de séances invalide");
+  }
+
+  if (backup.settings.some((item) => !isPlainRecord(item) || typeof item.key !== "string" || !item.key)) {
+    throw new Error("Réglages de sauvegarde invalides");
+  }
+}
+
+export async function importBackup(backup) {
+  validateBackup(backup);
 
   const db = await openDatabase();
   const stores = ["profile", "measurements", "sessions", "settings"];
@@ -160,25 +190,33 @@ export async function importBackup(backup) {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(stores, "readwrite");
 
+    for (const storeName of stores) {
+      transaction.objectStore(storeName).clear();
+    }
+
     if (backup.profile) {
       transaction.objectStore("profile").put({ ...backup.profile, id: PROFILE_ID });
     }
 
-    for (const item of Array.isArray(backup.measurements) ? backup.measurements : []) {
+    for (const item of backup.measurements) {
       transaction.objectStore("measurements").put(item);
     }
 
-    for (const item of Array.isArray(backup.sessions) ? backup.sessions : []) {
+    for (const item of backup.sessions) {
       transaction.objectStore("sessions").put(item);
     }
 
-    for (const item of Array.isArray(backup.settings) ? backup.settings : []) {
+    for (const item of backup.settings) {
       transaction.objectStore("settings").put(item);
     }
 
     transaction.oncomplete = () => {
       db.close();
-      resolve(true);
+      resolve({
+        measurements: backup.measurements.length,
+        sessions: backup.sessions.length,
+        settings: backup.settings.length
+      });
     };
     transaction.onerror = () => {
       const error = transaction.error;
