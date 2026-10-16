@@ -30,6 +30,8 @@
 - [x] Graphique de poids avec objectif de poids pour perte/prise et état atteint en vert.
 - [x] Agenda mensuel alimenté par les séances enregistrées.
 - [x] Export/import JSON depuis les Réglages.
+- [x] Restaurer un backup comme un snapshot complet : remplacement atomique du profil, du poids, des séances et des réglages au lieu d'un merge silencieux.
+- [ ] Tester sur Android le cycle complet : export → réinstallation/stockage vide → import → vérification du profil, du poids, des séances et des réglages.
 - [ ] Ajouter un `user_snapshot` (poids/taille) aux nouvelles séances au moment de leur démarrage.
 - [ ] Utiliser le poids réel du profil/snapshot dans l'estimation des calories au lieu de la référence provisoire.
 - [ ] Décider si d'autres mesures sont utiles : tour de taille, masse grasse, etc., sans surcharger le profil.
