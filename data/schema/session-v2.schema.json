@@ -59,6 +59,7 @@
           "items": { "$ref": "#/$defs/strengthSet" }
         },
         "cardio_completed": { "type": "boolean" },
+        "cardio": { "$ref": "#/$defs/cardioResult" },
         "total_reps": { "type": "number", "minimum": 0 },
         "volume_kg": { "type": "number", "minimum": 0 },
         "estimated_calories_kcal": { "type": "number", "minimum": 0 },
@@ -75,6 +76,16 @@
         "nominal_load_kg": { "type": "number", "minimum": 0 },
         "completed_at": { "type": ["string", "null"], "format": "date-time" },
         "rest_seconds_actual": { "type": ["integer", "null"], "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "cardioResult": {
+      "type": "object",
+      "required": ["distance_km", "average_speed_kmh", "incline_percent"],
+      "properties": {
+        "distance_km": { "type": "number", "exclusiveMinimum": 0 },
+        "average_speed_kmh": { "type": "number", "minimum": 0 },
+        "incline_percent": { "type": ["number", "null"], "minimum": 0 }
       },
       "additionalProperties": false
     },

@@ -162,14 +162,35 @@ Le poids du corps reste séparé et n'est pas ajouté automatiquement à la char
 
 ## Cardio
 
-Un exercice cardio n'utilise pas de séries de répétitions. Il stocke les mesures utiles de la machine lorsqu'elles sont disponibles :
+Les exercices cardio machine actuellement prévus sont :
 
-- durée ;
-- distance ;
-- dénivelé ;
-- vitesse moyenne ;
-- allure moyenne ;
-- inclinaison moyenne/maximale.
+- tapis de course ;
+- rameur ;
+- vélo ;
+- vélo elliptique.
+
+Un cardio machine ne demande pas de configuration avant le départ. Sa sélection démarre immédiatement l'occurrence d'exercice et son chrono repose sur `started_at`. L'action **Terminer l'exercice** fige `ended_at`, donc la durée réelle reste exacte même après un rechargement de page.
+
+Après l'arrêt, l'utilisateur renseigne la distance parcourue. La vitesse moyenne est une valeur dérivée :
+
+```text
+average_speed_kmh = distance_km / (duration_seconds / 3600)
+```
+
+Le tapis de course peut également conserver une inclinaison moyenne facultative. Les autres mesures propres aux machines (résistance, watts, cadence, dénivelé, allure, etc.) pourront être ajoutées plus tard si elles deviennent utiles.
+
+Dans une occurrence cardio v2, les mesures validées sont conservées dans :
+
+```text
+cardio
+├── distance_km
+├── average_speed_kmh
+└── incline_percent = nombre | null
+```
+
+`distance_km` est la donnée brute saisie après l'effort. `duration_seconds` est dérivée des timestamps de l'exercice. `average_speed_kmh` peut être mise en cache pour l'affichage mais doit rester recalculable depuis la distance et la durée. `incline_percent` vaut `null` lorsqu'elle n'est pas renseignée ou n'est pas applicable.
+
+Un exercice cardio n'utilise pas de séries de répétitions. Son état temporaire doit permettre de restaurer deux situations distinctes après rafraîchissement : cardio encore en cours, ou cardio déjà arrêté mais mesures finales pas encore validées.
 
 ## Repos
 
@@ -307,7 +328,7 @@ L'agenda du profil n'est pas une nouvelle source de données : il lit directemen
 ## Version du schéma
 
 - v1 : format historique initial des séances ;
-- v2 : format actuel multi-exercices avec récapitulatif de séance ;
+- v2 : format actuel multi-exercices avec récapitulatif de séance et mesures cardio machine optionnelles ;
 - profil v1 : profil local actuel ;
 - mesure v1 : historique du poids actuel ;
 - backup v1 : export/import local actuel.

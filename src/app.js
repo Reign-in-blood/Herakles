@@ -314,6 +314,8 @@ function initHome() {
   const recapCalories = document.querySelector("#recap-exercise-calories");
   const recapCalorieNote = document.querySelector("#recap-calorie-note");
   const saveExerciseButton = document.querySelector("#save-exercise-button");
+  const recapRepsLabel = recapReps.parentElement?.querySelector("small");
+  const recapVolumeLabel = recapVolume.parentElement?.querySelector("small");
 
   let exerciseStep = "categories";
   let currentCategory = null;
@@ -416,7 +418,8 @@ function initHome() {
           exercise: stored.exercise,
           planned: stored.planned,
           sets: stored.sets,
-          cardio_completed: Boolean(stored.cardio_completed)
+          cardio_completed: Boolean(stored.cardio_completed),
+          cardio: stored.cardio || null
         }
       };
     }
@@ -446,13 +449,52 @@ function initHome() {
     return `${String(minutes).padStart(2, "0")}:${String(remaining).padStart(2, "0")}`;
   }
 
+  function formatMetric(value, maximumFractionDigits = 2) {
+    return Number(value || 0).toLocaleString("fr-FR", { maximumFractionDigits });
+  }
+
+  function cardioNeedsMetrics(exerciseState) {
+    if (exerciseState?.exercise?.type !== "cardio") return false;
+    const distance = Number(exerciseState.cardio?.distance_km);
+    return !exerciseState.cardio_completed || !Number.isFinite(distance) || distance <= 0;
+  }
+
+  function cardioSupportsIncline(exerciseState) {
+    return Boolean(EXERCISES.find((exercise) => exercise.id === exerciseState?.exercise?.id)?.supportsIncline);
+  }
+
+  function createExerciseDraft(exercise, planned) {
+    return {
+      schema_version: 1,
+      exercise: {
+        id: exercise.id,
+        name: exercise.name,
+        type: exercise.type,
+        resistance: exercise.resistance,
+        primary_muscles: exercise.primary
+      },
+      planned
+    };
+  }
+
   function renderSessionClock() {
     if (!activeSession) return;
+
     sessionElapsed.textContent = formatElapsed(Date.now() - new Date(activeSession.started_at).getTime());
+
+    const exerciseState = currentExercise();
+    const cardioElapsed = sessionSets.querySelector("#cardio-exercise-elapsed");
+    if (!cardioElapsed || exerciseState?.exercise?.type !== "cardio") return;
+
+    const endTime = exerciseState.ended_at
+      ? new Date(exerciseState.ended_at).getTime()
+      : Date.now();
+    cardioElapsed.textContent = formatElapsed(endTime - new Date(exerciseState.started_at).getTime());
   }
 
   function getExerciseMetrics(exerciseState) {
-    const completedSets = exerciseState.sets.filter((set) => set.completed_at);
+    const sets = Array.isArray(exerciseState.sets) ? exerciseState.sets : [];
+    const completedSets = sets.filter((set) => set.completed_at);
     const totalReps = completedSets.reduce((sum, set) => sum + Number(set.reps || 0), 0);
     const volumeKg = completedSets.reduce(
       (sum, set) => sum + (Number(set.reps || 0) * Number(set.nominal_load_kg || 0)),
@@ -470,6 +512,10 @@ function initHome() {
     const estimatedCaloriesKcal = Math.round(
       met * 3.5 * CALORIE_REFERENCE_WEIGHT_KG / 200 * durationMinutes
     );
+    const distanceKm = Number(exerciseState.cardio?.distance_km || 0);
+    const averageSpeedKmh = durationSeconds > 0 && distanceKm > 0
+      ? distanceKm / (durationSeconds / 3600)
+      : 0;
 
     return {
       completedSets,
@@ -477,7 +523,9 @@ function initHome() {
       volumeKg,
       durationSeconds,
       estimatedCaloriesKcal,
-      met
+      met,
+      distanceKm,
+      averageSpeedKmh
     };
   }
 
@@ -559,7 +607,7 @@ function initHome() {
 
       const type = document.createElement("small");
       type.textContent = exercise.type === "cardio"
-        ? "Cardio"
+        ? "Cardio · départ immédiat"
         : RESISTANCE_LABELS[exercise.resistance];
 
       details.append(name, muscles, type);
@@ -575,8 +623,23 @@ function initHome() {
   }
 
   function showExerciseConfig(exercise) {
-    exerciseStep = "config";
     selectedExercise = exercise;
+
+    if (exercise.type === "cardio") {
+      exerciseStep = "session";
+      const draft = createExerciseDraft(exercise, {});
+
+      try {
+        sessionStorage.setItem("herakles.sessionDraft.v1", JSON.stringify(draft));
+      } catch (error) {
+        console.warn("Draft storage unavailable", error);
+      }
+
+      startExercise(draft);
+      return;
+    }
+
+    exerciseStep = "config";
     flowTitle.textContent = "Configurer l’exercice";
     flowIntro.textContent = "Ces valeurs sont des objectifs modifiables pendant l’exercice.";
     categoryList.hidden = true;
@@ -586,13 +649,13 @@ function initHome() {
 
     document.querySelector("#selected-exercise-name").textContent = exercise.name;
     document.querySelector("#selected-exercise-muscles").textContent = [...exercise.primary, ...exercise.secondary].join(" · ");
-    document.querySelector("#strength-fields").hidden = exercise.type === "cardio";
-    document.querySelector("#cardio-fields").hidden = exercise.type !== "cardio";
+    document.querySelector("#strength-fields").hidden = false;
+    document.querySelector("#cardio-fields").hidden = true;
     document.querySelectorAll("#strength-fields input").forEach((input) => {
-      input.disabled = exercise.type === "cardio";
+      input.disabled = false;
     });
     document.querySelectorAll("#cardio-fields input").forEach((input) => {
-      input.disabled = exercise.type !== "cardio";
+      input.disabled = true;
     });
 
     configSubmit.textContent = activeSession ? "Commencer l’exercice →" : "Commencer la séance →";
@@ -632,7 +695,8 @@ function initHome() {
             completed_at: null,
             rest_seconds_actual: null
           })),
-      cardio_completed: false
+      cardio_completed: false,
+      cardio: null
     };
 
     pendingSetIndex = null;
@@ -685,21 +749,143 @@ function initHome() {
     renderSessionClock();
 
     if (exerciseState.exercise.type === "cardio") {
-      sessionProgress.textContent = "Cardio en cours";
+      const metrics = getExerciseMetrics(exerciseState);
 
-      const detail = document.createElement("p");
-      detail.textContent = `Objectif : ${Math.round(exerciseState.planned.duration_seconds / 60)} min`;
+      if (!exerciseState.ended_at) {
+        sessionProgress.textContent = "Cardio en cours";
 
-      const finish = document.createElement("button");
-      finish.type = "button";
-      finish.className = "button button-primary";
-      finish.textContent = "Terminer l’exercice";
-      finish.addEventListener("click", () => {
+        const liveCard = document.createElement("div");
+        liveCard.className = "cardio-live-card";
+
+        const liveLabel = document.createElement("span");
+        liveLabel.className = "cardio-live-label";
+        liveLabel.textContent = "Durée de l’exercice";
+
+        const liveTime = document.createElement("strong");
+        liveTime.id = "cardio-exercise-elapsed";
+        liveTime.className = "cardio-live-time";
+        liveTime.textContent = formatElapsed(Date.now() - new Date(exerciseState.started_at).getTime());
+
+        const liveHint = document.createElement("small");
+        liveHint.textContent = "Aucune donnée à saisir pendant l’effort.";
+
+        liveCard.append(liveLabel, liveTime, liveHint);
+
+        const finish = document.createElement("button");
+        finish.type = "button";
+        finish.className = "button button-primary cardio-finish-button";
+        finish.textContent = "Terminer l’exercice";
+        finish.addEventListener("click", () => {
+          exerciseState.ended_at = new Date().toISOString();
+          exerciseState.cardio_completed = false;
+          persistActiveSession();
+          renderSession();
+        });
+
+        sessionSets.append(liveCard, finish);
+        renderSessionClock();
+        return;
+      }
+
+      sessionProgress.textContent = "Exercice terminé · complète les mesures";
+
+      const summary = document.createElement("div");
+      summary.className = "cardio-result-summary";
+
+      const summaryLabel = document.createElement("span");
+      summaryLabel.textContent = "Temps enregistré";
+
+      const summaryValue = document.createElement("strong");
+      summaryValue.textContent = formatExerciseDuration(metrics.durationSeconds);
+
+      summary.append(summaryLabel, summaryValue);
+
+      const form = document.createElement("form");
+      form.className = "cardio-results-form";
+
+      const fields = document.createElement("div");
+      fields.className = "cardio-result-fields";
+
+      const distanceLabel = document.createElement("label");
+      distanceLabel.textContent = "Distance parcourue (km)";
+      const distanceInput = document.createElement("input");
+      distanceInput.type = "number";
+      distanceInput.min = "0.01";
+      distanceInput.step = "0.01";
+      distanceInput.inputMode = "decimal";
+      distanceInput.required = true;
+      distanceInput.value = exerciseState.cardio?.distance_km ?? "";
+      distanceLabel.append(distanceInput);
+      fields.append(distanceLabel);
+
+      let inclineInput = null;
+      if (cardioSupportsIncline(exerciseState)) {
+        const inclineLabel = document.createElement("label");
+        inclineLabel.textContent = "Inclinaison moyenne (%) · facultatif";
+        inclineInput = document.createElement("input");
+        inclineInput.type = "number";
+        inclineInput.min = "0";
+        inclineInput.step = "0.1";
+        inclineInput.inputMode = "decimal";
+        inclineInput.value = exerciseState.cardio?.incline_percent ?? "";
+        inclineLabel.append(inclineInput);
+        fields.append(inclineLabel);
+      }
+
+      const speedPreview = document.createElement("p");
+      speedPreview.className = "cardio-average-preview";
+
+      const updateAveragePreview = () => {
+        const distance = Number(distanceInput.value);
+        if (!Number.isFinite(distance) || distance <= 0) {
+          speedPreview.textContent = "Vitesse moyenne : —";
+          return;
+        }
+
+        const hours = Math.max(metrics.durationSeconds, 1) / 3600;
+        speedPreview.textContent = `Vitesse moyenne : ${formatMetric(distance / hours)} km/h`;
+      };
+
+      distanceInput.addEventListener("input", updateAveragePreview);
+      updateAveragePreview();
+
+      const saveCardio = document.createElement("button");
+      saveCardio.type = "submit";
+      saveCardio.className = "button button-primary";
+      saveCardio.textContent = "Valider les mesures →";
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        if (!form.reportValidity()) return;
+
+        const distance = Number(distanceInput.value);
+        if (!Number.isFinite(distance) || distance <= 0) {
+          sessionFeedback.textContent = "Renseigne une distance supérieure à 0 km.";
+          return;
+        }
+
+        const incline = inclineInput?.value === "" || !inclineInput
+          ? null
+          : Number(inclineInput.value);
+        if (incline !== null && (!Number.isFinite(incline) || incline < 0)) {
+          sessionFeedback.textContent = "L’inclinaison doit être positive ou laissée vide.";
+          return;
+        }
+
+        const hours = Math.max(metrics.durationSeconds, 1) / 3600;
+        exerciseState.cardio = {
+          distance_km: distance,
+          average_speed_kmh: Math.round((distance / hours) * 100) / 100,
+          incline_percent: incline
+        };
         exerciseState.cardio_completed = true;
+        sessionFeedback.textContent = "";
+        persistActiveSession();
         showExerciseRecap();
       });
 
-      sessionSets.append(detail, finish);
+      form.append(fields, speedPreview, saveCardio);
+      sessionSets.append(summary, form);
       return;
     }
 
@@ -811,6 +997,12 @@ function initHome() {
     const exerciseState = currentExercise();
     if (!exerciseState) return;
 
+    if (exerciseState.exercise.type === "cardio" && cardioNeedsMetrics(exerciseState)) {
+      renderSession();
+      showScreen("session");
+      return;
+    }
+
     if (!exerciseState.ended_at) {
       exerciseState.ended_at = new Date().toISOString();
       persistActiveSession();
@@ -820,14 +1012,28 @@ function initHome() {
 
     recapExerciseName.textContent = exerciseState.exercise.name;
     recapDuration.textContent = formatExerciseDuration(metrics.durationSeconds);
-    recapReps.textContent = exerciseState.exercise.type === "cardio"
-      ? "—"
-      : String(metrics.totalReps);
-    recapVolume.textContent = exerciseState.exercise.type === "cardio"
-      ? "—"
-      : `${Math.round(metrics.volumeKg).toLocaleString("fr-FR")} kg`;
+
+    if (exerciseState.exercise.type === "cardio") {
+      if (recapRepsLabel) recapRepsLabel.textContent = "Distance";
+      if (recapVolumeLabel) recapVolumeLabel.textContent = "Vitesse moyenne";
+      recapReps.textContent = `${formatMetric(metrics.distanceKm)} km`;
+      recapVolume.textContent = `${formatMetric(metrics.averageSpeedKmh)} km/h`;
+    } else {
+      if (recapRepsLabel) recapRepsLabel.textContent = "Répétitions";
+      if (recapVolumeLabel) recapVolumeLabel.textContent = "Volume total";
+      recapReps.textContent = String(metrics.totalReps);
+      recapVolume.textContent = `${Math.round(metrics.volumeKg).toLocaleString("fr-FR")} kg`;
+    }
+
     recapCalories.textContent = `≈ ${metrics.estimatedCaloriesKcal} kcal`;
-    recapCalorieNote.textContent = `Estimation provisoire par MET (${metrics.met}) sur une référence de ${CALORIE_REFERENCE_WEIGHT_KG} kg. Le poids du profil permettra ensuite de personnaliser ce calcul.`;
+
+    const calorieNote = `Estimation provisoire par MET (${metrics.met}) sur une référence de ${CALORIE_REFERENCE_WEIGHT_KG} kg. Le poids du profil permettra ensuite de personnaliser ce calcul.`;
+    const incline = exerciseState.exercise.type === "cardio"
+      ? exerciseState.cardio?.incline_percent
+      : null;
+    recapCalorieNote.textContent = incline == null
+      ? calorieNote
+      : `Inclinaison moyenne : ${formatMetric(incline, 1)} % · ${calorieNote}`;
 
     showScreen("recap");
   }
@@ -835,6 +1041,12 @@ function initHome() {
   function saveExerciseInSession() {
     const exerciseState = currentExercise();
     if (!activeSession || !exerciseState) return;
+
+    if (exerciseState.exercise.type === "cardio" && cardioNeedsMetrics(exerciseState)) {
+      renderSession();
+      showScreen("session");
+      return;
+    }
 
     if (!exerciseState.ended_at) {
       exerciseState.ended_at = new Date().toISOString();
@@ -850,6 +1062,7 @@ function initHome() {
       planned: exerciseState.planned,
       sets: exerciseState.sets,
       cardio_completed: exerciseState.cardio_completed,
+      ...(exerciseState.exercise.type === "cardio" ? { cardio: exerciseState.cardio } : {}),
       total_reps: metrics.totalReps,
       volume_kg: metrics.volumeKg,
       estimated_calories_kcal: metrics.estimatedCaloriesKcal,
@@ -887,7 +1100,7 @@ function initHome() {
 
   document.querySelector("#start-workout-button").addEventListener("click", () => {
     if (currentExercise()) {
-      if (currentExercise().ended_at) {
+      if (currentExercise().ended_at && !cardioNeedsMetrics(currentExercise())) {
         showExerciseRecap();
       } else {
         renderSession();
@@ -952,37 +1165,19 @@ function initHome() {
 
   config.addEventListener("submit", (event) => {
     event.preventDefault();
-    if (!selectedExercise || !config.reportValidity()) return;
+    if (!selectedExercise || selectedExercise.type === "cardio" || !config.reportValidity()) return;
 
-    const cardio = selectedExercise.type === "cardio";
     const number = (id) => {
       const value = document.querySelector(id).value;
       return value === "" ? null : Number(value);
     };
 
-    const draft = {
-      schema_version: 1,
-      exercise: {
-        id: selectedExercise.id,
-        name: selectedExercise.name,
-        type: selectedExercise.type,
-        resistance: selectedExercise.resistance,
-        primary_muscles: selectedExercise.primary
-      },
-      planned: cardio
-        ? {
-            duration_seconds: number("#exercise-duration") * 60,
-            speed_kmh: number("#exercise-speed"),
-            distance_km: number("#exercise-distance"),
-            incline_percent: number("#exercise-incline")
-          }
-        : {
-            nominal_load_kg: number("#exercise-weight"),
-            sets: number("#exercise-sets"),
-            reps: number("#exercise-reps"),
-            rest_seconds: number("#exercise-rest")
-          }
-    };
+    const draft = createExerciseDraft(selectedExercise, {
+      nominal_load_kg: number("#exercise-weight"),
+      sets: number("#exercise-sets"),
+      reps: number("#exercise-reps"),
+      rest_seconds: number("#exercise-rest")
+    });
 
     try {
       sessionStorage.setItem("herakles.sessionDraft.v1", JSON.stringify(draft));
@@ -1025,7 +1220,7 @@ function initHome() {
       persistActiveSession();
 
       if (currentExercise()) {
-        if (currentExercise().ended_at) {
+        if (currentExercise().ended_at && !cardioNeedsMetrics(currentExercise())) {
           showExerciseRecap();
           initialScreen = "recap";
         } else {

@@ -18,7 +18,8 @@ Herakles est conçu pour des entraînements spontanés, sans planification oblig
 ```text
 Commencer une séance
 → choisir un exercice
-→ configurer et réaliser l'exercice
+→ configurer la musculation ou démarrer immédiatement un cardio machine
+→ réaliser l'exercice
 → consulter son récapitulatif
 → enregistrer l'exercice dans la séance active
 → ajouter d'autres exercices si nécessaire
@@ -35,17 +36,20 @@ Le socle PWA et une grande partie du parcours d'entraînement sont en place :
 
 - accueil mobile avec navigation ;
 - sélection par catégories et catalogue d'exercices ;
-- configuration musculation/cardio ;
+- configuration des exercices de musculation ;
+- cardio machine à départ immédiat pour tapis de course, rameur, vélo et vélo elliptique ;
+- chrono propre au cardio, durée figée à la fin, saisie de la distance puis calcul automatique de la vitesse moyenne ;
+- inclinaison moyenne facultative pour le tapis de course ;
 - gestion des séries avec répétitions et charges modifiables ;
 - validation progressive des séries ;
 - chronomètre de récupération fiable avec reprise par timestamps ;
 - notifications de fin de repos ;
 - suivi d'un chrono global de séance ;
-- récapitulatif d'exercice en cours d'intégration dans le flux multi-exercices ;
+- récapitulatif d'exercice intégré au flux multi-exercices ;
 - stockage local IndexedDB ;
 - PWA hors ligne avec mécanisme de mise à jour automatique et recherche manuelle des mises à jour.
 
-La priorité suivante est de finaliser le cycle **séance active → plusieurs exercices → récapitulatif global → enregistrement final**.
+La priorité actuelle reste la fiabilité des données locales et les tests réels de reprise de séance et de cardio sur téléphone.
 
 ## Structure
 
@@ -91,11 +95,11 @@ La hiérarchie métier est :
 séance → exercices[] → données propres à chaque exercice
 ```
 
-Les totaux de séance doivent être recalculables depuis les données des exercices et de leurs séries.
+Les totaux de séance doivent être recalculables depuis les données des exercices et de leurs séries ou mesures cardio.
 
 Voir :
 
 - `AGENTS.md` pour les règles de développement et le flux produit de référence ;
 - `docs/DATA_MODEL.md` pour la structure des données ;
-- `data/schema/session.schema.json` pour le schéma JSON actuel ;
+- `data/schema/session-v2.schema.json` pour le schéma JSON multi-exercices actuel ;
 - `TODO.md` pour les prochaines priorités.

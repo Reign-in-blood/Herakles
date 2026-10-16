@@ -10,6 +10,17 @@
 - [ ] Continuer les tests réels de reprise : série en cours, récupération, récap exercice et sélection entre deux exercices.
 - [ ] Ajouter une correction d'un exercice déjà enregistré dans la séance si le besoin se confirme.
 
+## Cardio machines
+
+- [x] Démarrer un exercice cardio machine immédiatement après sa sélection, sans configuration préalable.
+- [x] Chronométrer l'exercice depuis son timestamp `started_at` et conserver la reprise après rechargement.
+- [x] Figer la durée lors de **Terminer l'exercice** puis demander la distance parcourue.
+- [x] Calculer automatiquement la vitesse moyenne depuis la distance et la durée réelles.
+- [x] Permettre une inclinaison moyenne facultative pour le tapis de course.
+- [x] Ajouter le rameur, le vélo et le vélo elliptique au catalogue cardio.
+- [ ] Tester sur téléphone la reprise d'un cardio en cours, la reprise après arrêt avant saisie des mesures et l'enregistrement final dans une séance multi-exercices.
+- [ ] Affiner plus tard les métriques propres à chaque machine si utile : résistance, watts, cadence, dénivelé ou allure.
+
 ## Profil et données locales
 
 - [x] Profil local : homme/femme, taille, objectif de séances sur 7 jours et objectif principal.

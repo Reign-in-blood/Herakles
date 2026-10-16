@@ -72,7 +72,9 @@ Choisir un thème / groupe (dos, jambes, bras, etc.)
         ↓
 Choisir un exercice dans ce thème
         ↓
-Configurer puis réaliser ses séries ou son cardio
+Configurer la musculation ou démarrer immédiatement le cardio machine
+        ↓
+Réaliser l'exercice
         ↓
 Récapitulatif de l'exercice
         ↓
@@ -107,6 +109,20 @@ Règles importantes :
 - une série terminée devient une ligne de lecture seule ;
 - la dernière série conduit à **Terminer l'exercice**, puis au récapitulatif ;
 - l'exercice courant peut être corrigé ou abandonné sans perdre les exercices déjà enregistrés dans la séance.
+
+### Cardio machine pendant un exercice
+
+Le tapis de course, le rameur, le vélo et le vélo elliptique suivent un flux distinct de la musculation :
+
+- sélectionner le cardio démarre immédiatement l'exercice, sans formulaire préalable ;
+- `started_at` pilote le chrono propre à l'exercice et doit rester persisté pour survivre au rechargement ;
+- **Terminer l'exercice** fige `ended_at` et donc la durée réelle ;
+- après l'arrêt, demander la distance parcourue en kilomètres ;
+- calculer la vitesse moyenne depuis la distance et la durée réelles, sans la demander à l'utilisateur ;
+- le tapis de course peut recevoir une inclinaison moyenne facultative ;
+- conserver les mesures finales dans l'état de séance avant d'afficher le récapitulatif ;
+- si la page est rechargée après l'arrêt mais avant validation des mesures, revenir au formulaire de fin de cardio, pas directement au récapitulatif ;
+- enregistrer ensuite explicitement le cardio dans la séance active comme n'importe quel autre exercice.
 
 ### Chronomètre de repos
 
@@ -290,7 +306,7 @@ Le poids du corps reste séparé sauf modèle biomécanique explicitement défin
 Prévoir au moins :
 
 - `strength` : séries, répétitions, charge, repos ;
-- `cardio` : durée, distance, dénivelé, vitesse/allure, inclinaison ;
+- `cardio` : chrono réel, distance, vitesse moyenne dérivée et métriques machine facultatives ;
 - extensible plus tard sans casser les anciennes données.
 
 ## Compatibilité GitHub Pages / PWA

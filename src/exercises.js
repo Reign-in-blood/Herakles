@@ -10,7 +10,10 @@ export const CATEGORIES = [
 ];
 
 export const EXERCISES = [
-  { id: "tapis-course", name: "Tapis de course", categories: ["cardio","jambes","bas"], primary: ["Jambes","Système cardiovasculaire"], secondary: ["Fessiers"], type: "cardio", resistance: "machine", defaultDurationMinutes: 20 },
+  { id: "tapis-course", name: "Tapis de course", categories: ["cardio","jambes","bas"], primary: ["Jambes","Système cardiovasculaire"], secondary: ["Fessiers"], type: "cardio", resistance: "machine", supportsIncline: true },
+  { id: "rameur", name: "Rameur", categories: ["cardio","dos","jambes","haut","bas"], primary: ["Dos","Jambes","Système cardiovasculaire"], secondary: ["Biceps","Fessiers"], type: "cardio", resistance: "machine" },
+  { id: "velo", name: "Vélo", categories: ["cardio","jambes","bas"], primary: ["Jambes","Système cardiovasculaire"], secondary: ["Fessiers","Mollets"], type: "cardio", resistance: "machine" },
+  { id: "velo-elliptique", name: "Vélo elliptique", categories: ["cardio","jambes","bas","haut"], primary: ["Jambes","Système cardiovasculaire"], secondary: ["Fessiers","Bras"], type: "cardio", resistance: "machine" },
   { id: "leg-curl", name: "Leg curl", categories: ["jambes","bas"], primary: ["Ischio-jambiers"], secondary: ["Mollets"], type: "strength", resistance: "machine" },
   { id: "triceps-poulie", name: "Triceps à la poulie", categories: ["bras","haut"], primary: ["Triceps"], secondary: [], type: "strength", resistance: "cable" },
   { id: "developpe-couche", name: "Développé couché", categories: ["pectoraux","haut","bras"], primary: ["Pectoraux"], secondary: ["Triceps","Deltoïdes antérieurs"], type: "strength", resistance: "free_weight" },
