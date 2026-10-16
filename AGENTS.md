@@ -72,7 +72,7 @@ Choisir un thème / groupe (dos, jambes, bras, etc.)
         ↓
 Choisir un exercice dans ce thème
         ↓
-Configurer la musculation ou afficher l'écran de départ du cardio machine
+Configurer la musculation ou afficher directement l'écran de l'exercice cardio
         ↓
 Démarrer explicitement puis réaliser l'exercice
         ↓
@@ -114,8 +114,11 @@ Règles importantes :
 
 Le tapis de course, le rameur, le vélo et le vélo elliptique suivent un flux distinct de la musculation :
 
-- sélectionner le cardio ouvre d'abord un écran de préparation sans démarrer le chrono ;
+- sélectionner le cardio ouvre directement **le même écran d'exercice qui servira pendant le chrono** ;
+- avant le départ, cet écran affiche le chrono à `00:00:00` et le bouton **Démarrer l'exercice** ;
+- ne jamais ajouter une page ou un écran intermédiaire de préparation entre la sélection du cardio et l'écran du chrono ;
 - seul le bouton **Démarrer l'exercice** crée réellement l'exercice courant et initialise `started_at` ;
+- après le départ, le même écran conserve le chrono et remplace l'action de départ par **Terminer l'exercice** ;
 - `started_at` pilote le chrono propre à l'exercice et doit rester persisté pour survivre au rechargement ;
 - **Terminer l'exercice** fige `ended_at` et donc la durée réelle ;
 - après l'arrêt, demander la distance parcourue en kilomètres ;
@@ -209,7 +212,6 @@ L'import actuel est un **merge par identifiant** : ajout des nouveaux éléments
 - `src/profile.js` : profil local, historique du poids, agenda, export/import ;
 - `src/home-dashboard.js` : statistiques réelles de l'accueil depuis IndexedDB ;
 - `src/exercises.js` : catalogue et catégories ;
-- `src/cardio-start-gate.js` : étape de préparation cardio et démarrage explicite du chrono ;
 - `src/rest-timer.js` : récupération ;
 - `src/notifications.js` : notifications ;
 - `src/storage.js` : persistance IndexedDB ;
