@@ -609,12 +609,13 @@ body.update-dialog-open { overflow: hidden; }
 .home-header .brand-mark { border: 0; outline: 0; background: none; font-size: 2.4rem; color: var(--color10); width: 52px; flex-basis: 52px; }
 .profile-button { width: 40px; height: 40px; min-width: 40px; min-height: 40px; border: 1px solid var(--color9); border-radius: 50%; color: var(--color7); background: var(--color3); font-size: 1.4rem; }
 .home-screen { display: grid; gap: 18px; }
-.hero-card { position: relative; isolation: isolate; display: flex; flex-direction: column; justify-content: space-between; min-height: 190px; padding: 20px 14px 14px; overflow: hidden; border: 1px solid var(--color5); border-radius: var(--radius2); background: radial-gradient(ellipse at 83% 28%, var(--color4), transparent 58%), linear-gradient(125deg,var(--color3),var(--color1)); }
-.hero-card::before { content: ""; position: absolute; inset: 0; z-index: -1; opacity: .12; background: repeating-linear-gradient(135deg,transparent 0 29px,var(--color9) 30px,transparent 31px); }
+.hero-card { position: relative; isolation: isolate; display: flex; flex-direction: column; justify-content: space-between; min-height: 190px; padding: 20px 14px 14px; overflow: hidden; border: 1px solid var(--color5); border-radius: var(--radius2); background: var(--color3); }
+.hero-card::before { content: ""; position: absolute; inset: 0; z-index: 0; background-image: url("../assets/general/H_BG_01.webp"); background-repeat: no-repeat; background-position: right 20%; background-size: cover; }
+.hero-card::after { content: ""; position: absolute; inset: 0; z-index: 0; background: linear-gradient(90deg,var(--color1) 0%,var(--color1) 16%,transparent 72%), linear-gradient(0deg,var(--color1) 0%,transparent 52%); pointer-events: none; }
 .hero-content { position: relative; z-index: 1; }
 .hero-kicker { margin: 0 0 14px; color: var(--color8); font-size: .72rem; letter-spacing: .18em; }
 .hero-date { display: flex; flex-wrap: wrap; gap: 20px; margin: 0; font-size: clamp(1.1rem, 5.5vw, 1.55rem); color: var(--color10); }
-.hero-statue { position: absolute; right: 12px; top: 4px; font: bold 9rem Georgia,serif; color: var(--color12); opacity: .14; pointer-events: none; }
+.hero-statue { display: none; }
 .hero-start { position: relative; z-index: 1; width: 100%; min-height: 56px; border: 1px solid var(--color11); border-radius: var(--radius1); background: linear-gradient(120deg,var(--color11),var(--color10)); color: var(--color1); font-size: 1.08rem; font-weight: 850; }
 .hero-start span { margin-right: 12px; }
 .period-tabs { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 6px; }
