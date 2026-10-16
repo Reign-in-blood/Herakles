@@ -169,7 +169,7 @@ Les exercices cardio machine actuellement prévus sont :
 - vélo ;
 - vélo elliptique.
 
-Un cardio machine ne demande pas de configuration avant le départ. Sa sélection démarre immédiatement l'occurrence d'exercice et son chrono repose sur `started_at`. L'action **Terminer l'exercice** fige `ended_at`, donc la durée réelle reste exacte même après un rechargement de page.
+Un cardio machine ne demande pas de configuration avant le départ. Sa sélection ouvre directement l'écran de l'exercice avec un chrono à `00:00:00`. L'occurrence et son `started_at` ne sont créés qu'au clic sur **Démarrer l'exercice**. L'action **Terminer l'exercice** fige `ended_at`, donc la durée réelle reste exacte même après un rechargement de page.
 
 Après l'arrêt, l'utilisateur renseigne la distance parcourue. La vitesse moyenne est une valeur dérivée :
 
@@ -279,7 +279,7 @@ measurement
 
 Une mesure enregistrée le même jour remplace la mesure de ce jour. Cela permet une saisie simple : au maximum un point de poids par journée dans le graphique actuel.
 
-Le graphique relie les mesures dans l'ordre chronologique. Pour un objectif `weight_loss`, l'objectif est atteint lorsque le dernier poids est inférieur ou égal à `target_weight_kg`. Pour `weight_gain`, il est atteint lorsque le dernier poids est supérieur ou égal à la cible. La ligne d'objectif passe alors de l'état erreur à l'état succès.
+Le graphique relie les mesures dans l'ordre chronologique. Pour un objectif `weight_loss`, l'objectif est atteint lorsque le dernier poids est inférieur ou égal à `target_weight_kg`. Pour `weight_gain`, l'objectif est atteint lorsque le dernier poids est supérieur ou égal à la cible. La ligne d'objectif passe alors de l'état erreur à l'état succès.
 
 ## IndexedDB — version applicative
 
@@ -317,7 +317,11 @@ backup
 └── settings[]
 ```
 
-L'import est actuellement un **merge par identifiant** : les éléments absents sont ajoutés et ceux ayant le même identifiant sont remplacés. Il ne supprime pas automatiquement les données locales absentes du fichier importé.
+L'import est une **restauration complète de snapshot**, pas un merge. Après validation du fichier, les stores persistants `profile`, `measurements`, `sessions` et `settings` sont remplacés dans une seule transaction IndexedDB par le contenu exact de la sauvegarde. Les éléments locaux absents du backup sont donc supprimés.
+
+La restauration est atomique : si la transaction échoue, elle ne doit pas laisser une base partiellement restaurée. Après succès, les états temporaires de séance (`activeSession`, thème actif, chrono de repos et brouillon d'exercice) sont effacés afin qu'une ancienne séance locale ne se mélange pas aux données restaurées.
+
+Un éventuel futur import partiel ou fusion de données devra être une fonctionnalité distincte et explicitement nommée ; il ne doit jamais être appliqué silencieusement lors d'une restauration de backup.
 
 Le format d'export doit rester versionné pour permettre une migration future avant toute synchronisation cloud.
 
