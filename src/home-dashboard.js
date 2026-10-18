@@ -356,6 +356,7 @@ navHome?.addEventListener("click", () => {
 });
 
 window.addEventListener("pageshow", () => void refreshDashboard());
+window.addEventListener("herakles:sessions-changed", () => void refreshDashboard());
 
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "visible") void refreshDashboard();
