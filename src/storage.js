@@ -85,6 +85,11 @@ export async function getAllSessions() {
   return runRequest("sessions", "readonly", (store) => store.getAll());
 }
 
+export async function deleteSession(id) {
+  if (typeof id !== "string" || !id) throw new Error("Identifiant de séance invalide");
+  return runRequest("sessions", "readwrite", (store) => store.delete(id));
+}
+
 export async function getProfile() {
   const profile = await runRequest("profile", "readonly", (store) => store.get(PROFILE_ID));
   return profile || null;
