@@ -7,6 +7,7 @@ import {
   saveMeasurement,
   saveProfile
 } from "./storage.js";
+import { appendAgendaSessionActions } from "./agenda-session-actions.js";
 
 const profileButton = document.querySelector(".profile-button");
 const appShell = document.querySelector(".app-shell");
@@ -413,6 +414,8 @@ function renderAgendaDayDetails(dateKey, sessions) {
   }
 
   sessions.forEach((session) => {
+    const entry = document.createElement("div");
+    entry.className = "agenda-session-entry";
     const item = document.createElement("article");
     item.className = "agenda-session-item";
     const name = document.createElement("strong");
@@ -421,8 +424,22 @@ function renderAgendaDayDetails(dateKey, sessions) {
     const exerciseCount = session.summary?.exercise_count ?? session.exercises?.length ?? 0;
     detail.textContent = `${exerciseCount} exercice${exerciseCount > 1 ? "s" : ""} · ${formatDuration(session.duration_seconds)}`;
     item.append(name, detail);
-    root.append(item);
+    entry.append(item);
+    appendAgendaSessionActions(entry, session, refreshAgendaAfterChange);
+    root.append(entry);
   });
+}
+
+async function refreshAgendaAfterChange(startedAt) {
+  sessionsCache = await getAllSessions();
+  const date = new Date(startedAt);
+  currentCalendarDate = new Date(date.getFullYear(), date.getMonth(), 1);
+  renderAgenda();
+  const dateKey = localDateKey(date);
+  renderAgendaDayDetails(dateKey, sessionsCache.filter((session) =>
+    session.started_at && localDateKey(session.started_at) === dateKey
+  ));
+  window.dispatchEvent(new Event("herakles:sessions-changed"));
 }
 
 function renderAgenda() {
