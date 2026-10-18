@@ -189,6 +189,8 @@ La logique réelle du tableau de bord est dans `src/home-dashboard.js`. L'ancien
 
 L'agenda du profil est une vue dérivée du store `sessions`. Ne pas créer une deuxième source de vérité pour le calendrier : les jours occupés doivent être calculés depuis `session.started_at`.
 
+L'agenda du profil permet de modifier une séance historique (horaires, répétitions/charges, mesures cardio v2) et de supprimer une séance après confirmation. Modifier ou supprimer une séance doit cibler uniquement son identifiant IndexedDB, préserver les autres séances même sur la même date, mettre à jour les agrégats et rafraîchir calendrier et tableau de bord. Un déplacement horaire décale aussi les timestamps des exercices et séries afin de conserver leur cohérence.
+
 ## Export / import
 
 Les Réglages proposent une sauvegarde JSON locale :
@@ -212,6 +214,7 @@ Ne jamais réintroduire un merge silencieux dans l'action de restauration. Si un
 - `src/app.js` : navigation et logique principale ;
 - `src/session-flow.js` : thème actif, reprise, fin de séance et récap global ;
 - `src/profile.js` : profil local, historique du poids, agenda, export/import ;
+- `src/agenda-session-actions.js` : modification et suppression ciblées de séances historiques ;
 - `src/home-dashboard.js` : statistiques réelles de l'accueil depuis IndexedDB ;
 - `src/exercises.js` : catalogue et catégories ;
 - `src/rest-timer.js` : récupération ;
