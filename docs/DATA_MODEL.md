@@ -329,6 +329,8 @@ Le format d'export doit rester versionné pour permettre une migration future av
 
 L'agenda du profil n'est pas une nouvelle source de données : il lit directement les séances du store `sessions` et les positionne selon `started_at`. Les détails affichés doivent donc toujours être dérivables des séances enregistrées.
 
+Depuis le calendrier, la modification d'une séance conserve son `id` et utilise `saveSession` dans le store IndexedDB existant. Les horaires de début et de fin sont éditables et `duration_seconds` est dérivé de leur différence ; les dates des exercices et des séries sont décalées si le début change. Les valeurs de séries et les mesures cardio v2 peuvent être rectifiées et les agrégats sont recalculés. La suppression est une opération distincte, confirmée, ciblée par `id` : même si plusieurs séances existent sur une date, une seule est supprimée. Calendrier et statistiques sont réactualisés après l'opération.
+
 ## Version du schéma
 
 - v1 : format historique initial des séances ;
