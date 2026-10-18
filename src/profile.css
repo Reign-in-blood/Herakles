@@ -344,3 +344,83 @@ button.agenda-day.is-today {
     text-align: left;
   }
 }
+
+
+/* Modification et suppression des séances depuis l'agenda. */
+.agenda-session-entry,
+.agenda-session-actions,
+.agenda-session-editor,
+.agenda-edit-exercise {
+  display: grid;
+  gap: 8px;
+}
+
+.agenda-session-actions .button,
+.agenda-session-editor > .button {
+  display: block;
+  width: 100%;
+  min-height: var(--tap-size);
+}
+
+.agenda-button-danger {
+  border: 1px solid var(--color16);
+  border-radius: var(--radius1);
+  background: var(--color17);
+  color: var(--color16);
+  font: inherit;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.agenda-button-danger:disabled {
+  opacity: 0.6;
+}
+
+.agenda-session-editor {
+  padding: 14px;
+  border: 1px solid var(--color5);
+  border-radius: 12px;
+  background: var(--color2);
+}
+
+.agenda-session-editor > strong,
+.agenda-edit-exercise > strong {
+  color: var(--color7);
+}
+
+.agenda-edit-exercise {
+  padding-top: 10px;
+  border-top: 1px solid var(--color6);
+}
+
+.agenda-edit-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.agenda-edit-fields label {
+  display: grid;
+  min-width: 0;
+  gap: 6px;
+  color: var(--color8);
+  font-size: 0.76rem;
+}
+
+.agenda-edit-fields input {
+  width: 100%;
+  min-width: 0;
+  min-height: var(--tap-size);
+  padding: 9px;
+  border: 1px solid var(--color5);
+  border-radius: 10px;
+  background: var(--color1);
+  color: var(--color7);
+  font: inherit;
+}
+
+@media (max-width: 520px) {
+  .agenda-edit-fields {
+    grid-template-columns: 1fr;
+  }
+}
