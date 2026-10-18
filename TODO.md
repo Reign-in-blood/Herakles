@@ -29,6 +29,9 @@
 - [x] Historique du poids daté dans IndexedDB.
 - [x] Graphique de poids avec objectif de poids pour perte/prise et état atteint en vert.
 - [x] Agenda mensuel alimenté par les séances enregistrées.
+- [x] Ajouter sous chaque séance du calendrier un bouton Modifier et un bouton Supprimer rouge avec confirmation.
+- [x] Permettre la modification des horaires, des répétitions/charges et du cardio v2, avec recalcul des totaux et actualisation de l'accueil.
+- [ ] Tester sur Android la modification d'une séance historique et la suppression d'une séance parmi plusieurs le même jour.
 - [x] Export/import JSON depuis les Réglages.
 - [x] Restaurer un backup comme un snapshot complet : remplacement atomique du profil, du poids, des séances et des réglages au lieu d'un merge silencieux.
 - [ ] Tester sur Android le cycle complet : export → réinstallation/stockage vide → import → vérification du profil, du poids, des séances et des réglages.
