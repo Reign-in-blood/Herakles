@@ -77,6 +77,8 @@ Ce choix est une règle de conception pour la refonte future. Le flux actuel ci-
 
 **Piste UX à préciser : enrichir les cartes des exercices déjà réalisés avec leurs résultats de la séance du jour** (par exemple séries, répétitions, charges/volume, durée, ou métriques cardio selon le type). Les exercices encore à faire présentent leurs paramètres prévus. Les données affichées doivent venir de la séance en cours, sans inventer de statistiques et sans modifier les séances historiques. La quantité exacte d'informations et l'accès éventuel au récapitulatif détaillé restent à décider.
 
+**Décision validée : cliquer sur un exercice terminé ne doit jamais le redémarrer.** Depuis la liste des exercices de la séance active, une carte marquée « Terminé » ouvre uniquement le détail des résultats réellement enregistrés pour cette exécution. L'utilisateur peut y corriger les séries, répétitions et charges si nécessaire, puis enregistrer les corrections et revenir à la liste. Ne pas relancer l'exercice, ne pas créer de seconde exécution, et ne pas réinitialiser ses chronomètres. Les statistiques de la séance doivent refléter les valeurs corrigées, sans modifier le programme prévu ni les séances historiques. Les champs précis des autres types d'exercices (cardio) restent à cadrer.
+
 Les détails de modification et de réordonnancement du programme restent à discuter avant implémentation.
 
 ## Flux produit de référence
