@@ -67,7 +67,11 @@ Les entraînements sont **spontanés** : Herakles ne doit pas imposer de planifi
 
 La refonte en discussion propose deux entrées depuis l'accueil : **Programmer une séance** et **Séance libre**. **Décision validée : à l'ouverture d'une séance programmée, l'utilisateur arrive d'abord sur une vue complète de cette séance (exercices et paramètres prévus), et non directement sur le premier exercice.** Le démarrage est une action distincte et explicite, via **Démarrer la séance** ; la simple consultation du programme ne lance ni séance active ni chronomètre global.
 
-Ce choix est une règle de conception pour la refonte future. Le flux actuel ci-dessous reste celui de l'application en production jusqu'à modification explicite du code. Les détails de modification, réordonnancement et déroulement des exercices restent à discuter avant implémentation.
+Ce choix est une règle de conception pour la refonte future. Le flux actuel ci-dessous reste celui de l'application en production jusqu'à modification explicite du code.
+
+**Décision validée : ordre d'exécution libre dans une séance programmée.** Après « Démarrer la séance », afficher la liste complète des exercices prévus, sans démarrer automatiquement le premier exercice. L'utilisateur peut sélectionner n'importe quel exercice, quelle que soit sa position dans le programme (par exemple si une machine est occupée). Un clic ouvre la fiche de l'exercice choisi, puis seul le bouton explicite « Commencer » lance cet exercice. À la fin de l'exercice, revenir à la liste pour choisir librement le suivant. Distinguer le démarrage du chrono global de la séance du démarrage propre à chaque exercice ; le premier est déclenché par « Démarrer la séance », le second par « Commencer » sur la fiche de l'exercice. Prévoir le suivi des exercices encore à réaliser et de ceux terminés, sans modifier implicitement l'ordre du programme.
+
+Les détails de modification et de réordonnancement du programme restent à discuter avant implémentation.
 
 ## Flux produit de référence
 
