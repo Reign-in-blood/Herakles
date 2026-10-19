@@ -1,5 +1,5 @@
 import { CATEGORIES, EXERCISES } from "./exercises.js";
-import { countSessions, saveSession } from "./storage.js";
+import { countSessions, saveSession, deleteWorkoutPlan } from "./storage.js";
 
 const ACTIVE_SESSION_KEY = "herakles.activeSession.v1";
 const SESSION_CATEGORY_KEY = "herakles.sessionCategory.v1";
@@ -333,7 +333,7 @@ function showSessionRecap() {
     list.append(row);
   });
 
-  ["home-screen", "exercise-flow", "session-panel", "exercise-recap", "rest-timer", "system-panel"].forEach((id) => {
+  ["home-screen", "exercise-flow", "workout-planner", "workout-overview", "session-panel", "exercise-recap", "rest-timer", "system-panel"].forEach((id) => {
     const screen = document.getElementById(id);
     if (screen) screen.hidden = true;
   });
@@ -364,7 +364,12 @@ async function saveAndFinishSession() {
     started_at: session.started_at,
     ended_at: endedAt.toISOString(),
     duration_seconds: totals.durationSeconds,
-    theme_id: categoryId,
+    theme_id: session.mode === "scheduled" ? null : categoryId,
+    name: session.name || "Séance",
+    mode: session.mode || "free",
+    source_plan_id: session.source_plan_id || null,
+    planned_at: session.planned_at || null,
+    planned_exercises: session.planned_exercises || [],
     exercises: session.exercises,
     summary: {
       exercise_count: totals.exerciseCount,
@@ -376,6 +381,13 @@ async function saveAndFinishSession() {
 
   try {
     await saveSession(record);
+    if (session.source_plan_id) {
+      try {
+        await deleteWorkoutPlan(session.source_plan_id);
+      } catch (planError) {
+        console.warn("Completed scheduled workout could not be removed from planned list", planError);
+      }
+    }
     localStorage.removeItem(ACTIVE_SESSION_KEY);
     localStorage.removeItem(SESSION_CATEGORY_KEY);
     sessionStorage.removeItem("herakles.sessionDraft.v1");
@@ -548,7 +560,7 @@ function showRecoveredRestTimer() {
 
   recoveredRestSetIndex = setIndex;
 
-  ["home-screen", "exercise-flow", "session-panel", "exercise-recap", "system-panel"].forEach((id) => {
+  ["home-screen", "exercise-flow", "workout-planner", "workout-overview", "session-panel", "exercise-recap", "system-panel"].forEach((id) => {
     const screen = document.getElementById(id);
     if (screen) screen.hidden = true;
   });
@@ -580,6 +592,8 @@ function finishRecoveredRestIfNeeded() {
     if (saveActiveSession(session)) window.location.reload();
   }, 0);
 }
+
+window.addEventListener("herakles:show-session-recap", showSessionRecap);
 
 document.addEventListener("click", (event) => {
   const categoryButton = event.target.closest(".category-choice");
