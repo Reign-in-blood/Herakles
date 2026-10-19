@@ -8,7 +8,7 @@ Herakles est une application personnelle de suivi d'entraînement, **local-first
 - PWA installable directement sur Android depuis le navigateur ;
 - fonctionnement hors ligne après une première visite ;
 - stockage local avec IndexedDB ;
-- export/import JSON à terme ;
+- export/import JSON local ;
 - possibilité d'ajouter plus tard un paquet APK avec Capacitor et GitHub Releases.
 
 ## Flux principal
@@ -16,17 +16,14 @@ Herakles est une application personnelle de suivi d'entraînement, **local-first
 Herakles est conçu pour des entraînements spontanés, sans planification obligatoire.
 
 ```text
-Commencer une séance
-→ choisir un exercice
-→ configurer la musculation ou ouvrir directement l'écran d'un cardio machine
-→ démarrer explicitement le cardio depuis son écran
-→ réaliser l'exercice
-→ consulter son récapitulatif
-→ enregistrer l'exercice dans la séance active
-→ ajouter d'autres exercices si nécessaire
-→ terminer la séance
-→ consulter le récapitulatif global
-→ enregistrer la séance complète
+Séance libre → catégorie / recherche → exercice → commencer
+ou
+Programmer une séance → nouvelle séance ou favori → nom / date / exercices
+→ enregistrer → consulter la séance entière → démarrer la séance
+→ choisir librement un exercice → commencer cet exercice
+→ réaliser / valider → retour à la liste de séance
+→ consulter/corriger les résultats ou ajouter un exercice
+→ terminer la séance → récapitulatif global → enregistrer les résultats
 ```
 
 Une séance est donc un conteneur composé de plusieurs exercices. **Terminer un exercice ne termine pas la séance.**
@@ -69,6 +66,9 @@ Herakles/
 ├── sw.js
 ├── assets/
 ├── src/
+│   ├── workout-planner.js
+│   ├── workout-plans.js
+│   ├── workout.css
 │   ├── app.js
 │   ├── exercises.js
 │   ├── notifications.js
@@ -78,7 +78,9 @@ Herakles/
 │   └── styles.css
 ├── data/
 │   ├── schema/
-│   │   └── session.schema.json
+│   │   ├── session.schema.json
+│   │   ├── session-v2.schema.json
+│   │   └── workout-plan-v1.schema.json
 │   └── examples/
 └── docs/
     └── DATA_MODEL.md
