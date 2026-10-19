@@ -73,7 +73,11 @@ Pour la conception future, distinguer conceptuellement :
 
 Piste de conception retenue : **les séances historiques pourront être marquées comme favorites, y compris rétroactivement depuis le calendrier**, chacune individuellement. Le parcours de programmation proposera la réutilisation de ces séances favorites ainsi que la création d'une nouvelle séance. Retirer un favori ne supprime jamais la séance source ou une occurrence déjà programmée. L'opération « Reprogrammer » doit produire une copie des exercices et des paramètres pertinents, pas une copie des mesures ou des timestamps réellement effectués.
 
-Il reste à décider si un favori correspond à une référence vers une séance historique ou à un modèle autonome créé depuis elle, ainsi que le comportement quand l'historique source change ou est supprimé. Aucun nouveau store IndexedDB, schéma ou migration n'est encore validé ; préserver les données v1/v2 existantes et inclure les futurs objets pertinents dans l'export/import local.
+**Décision validée : un favori est un modèle autonome, copié depuis la séance historique au moment de sa mise en favori.** Il conserve la composition et les paramètres utiles à une future programmation, sans lier son contenu aux changements ultérieurs de la séance historique source. Une correction ou une suppression de la séance source ne doit pas modifier ou supprimer le modèle favori. Chaque programmation créée à partir d'un favori conserve ensuite sa propre copie. Le retrait d'un favori n'efface pas l'historique ni les séances déjà programmées.
+
+**Décision validée : les séances peuvent recevoir un nom personnalisé.** Ce nom doit pouvoir être conservé et affiché dans les interfaces adaptées (calendrier, programmation, favoris), tout en conservant l'accès aux séances historiques v1/v2 qui ne possèdent pas encore de nom. Les modalités précises du renommage et de la copie des intitulés restent à définir.
+
+Aucun nouveau store IndexedDB, schéma ou migration n'est encore validé ; préserver les données v1/v2 existantes et inclure les futurs objets pertinents dans l'export/import local.
 
 ## Principe important : données brutes d'abord
 
