@@ -13,18 +13,88 @@
     "summary"
   ],
   "properties": {
-    "schema_version": { "const": 2 },
-    "id": { "type": "string", "minLength": 1 },
-    "started_at": { "type": "string", "format": "date-time" },
-    "ended_at": { "type": "string", "format": "date-time" },
-    "duration_seconds": { "type": "integer", "minimum": 0 },
-    "theme_id": { "type": ["string", "null"] },
+    "schema_version": {
+      "const": 2
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "ended_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "duration_seconds": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "theme_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
     "exercises": {
       "type": "array",
       "minItems": 1,
-      "items": { "$ref": "#/$defs/exerciseOccurrence" }
+      "items": {
+        "$ref": "#/$defs/exerciseOccurrence"
+      }
     },
-    "summary": { "$ref": "#/$defs/sessionSummary" }
+    "summary": {
+      "$ref": "#/$defs/sessionSummary"
+    },
+    "name": {
+      "type": "string",
+      "maxLength": 100
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "free",
+        "scheduled"
+      ]
+    },
+    "source_plan_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "planned_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "planned_exercises": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "uid",
+          "exercise",
+          "planned"
+        ],
+        "properties": {
+          "uid": {
+            "type": "string"
+          },
+          "exercise": {
+            "type": "object"
+          },
+          "planned": {
+            "type": "object"
+          }
+        },
+        "additionalProperties": true
+      }
+    }
   },
   "additionalProperties": false,
   "$defs": {
@@ -39,63 +109,167 @@
         "duration_seconds"
       ],
       "properties": {
-        "id": { "type": "string", "minLength": 1 },
-        "type": { "type": "string", "enum": ["strength", "cardio"] },
-        "name": { "type": "string", "minLength": 1 },
-        "resistance": { "type": ["string", "null"] },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "strength",
+            "cardio"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "resistance": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "primary_muscles": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": {
+            "type": "string"
+          }
         },
-        "started_at": { "type": "string", "format": "date-time" },
-        "ended_at": { "type": "string", "format": "date-time" },
-        "duration_seconds": { "type": "integer", "minimum": 0 },
+        "started_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "ended_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "duration_seconds": {
+          "type": "integer",
+          "minimum": 0
+        },
         "planned": {
           "type": "object",
           "additionalProperties": true
         },
         "sets": {
           "type": "array",
-          "items": { "$ref": "#/$defs/strengthSet" }
+          "items": {
+            "$ref": "#/$defs/strengthSet"
+          }
         },
-        "cardio_completed": { "type": "boolean" },
-        "cardio": { "$ref": "#/$defs/cardioResult" },
-        "total_reps": { "type": "number", "minimum": 0 },
-        "volume_kg": { "type": "number", "minimum": 0 },
-        "estimated_calories_kcal": { "type": "number", "minimum": 0 },
-        "calories_estimate": { "$ref": "#/$defs/calorieEstimate" }
+        "cardio_completed": {
+          "type": "boolean"
+        },
+        "cardio": {
+          "$ref": "#/$defs/cardioResult"
+        },
+        "total_reps": {
+          "type": "number",
+          "minimum": 0
+        },
+        "volume_kg": {
+          "type": "number",
+          "minimum": 0
+        },
+        "estimated_calories_kcal": {
+          "type": "number",
+          "minimum": 0
+        },
+        "calories_estimate": {
+          "$ref": "#/$defs/calorieEstimate"
+        },
+        "plan_item_uid": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
       },
       "additionalProperties": false
     },
     "strengthSet": {
       "type": "object",
-      "required": ["index", "reps", "nominal_load_kg"],
+      "required": [
+        "index",
+        "reps",
+        "nominal_load_kg"
+      ],
       "properties": {
-        "index": { "type": "integer", "minimum": 1 },
-        "reps": { "type": "integer", "minimum": 0 },
-        "nominal_load_kg": { "type": "number", "minimum": 0 },
-        "completed_at": { "type": ["string", "null"], "format": "date-time" },
-        "rest_seconds_actual": { "type": ["integer", "null"], "minimum": 0 }
+        "index": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "reps": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "nominal_load_kg": {
+          "type": "number",
+          "minimum": 0
+        },
+        "completed_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "rest_seconds_actual": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        }
       },
       "additionalProperties": false
     },
     "cardioResult": {
       "type": "object",
-      "required": ["distance_km", "average_speed_kmh", "incline_percent"],
+      "required": [
+        "distance_km",
+        "average_speed_kmh",
+        "incline_percent"
+      ],
       "properties": {
-        "distance_km": { "type": "number", "exclusiveMinimum": 0 },
-        "average_speed_kmh": { "type": "number", "minimum": 0 },
-        "incline_percent": { "type": ["number", "null"], "minimum": 0 }
+        "distance_km": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "average_speed_kmh": {
+          "type": "number",
+          "minimum": 0
+        },
+        "incline_percent": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        }
       },
       "additionalProperties": false
     },
     "calorieEstimate": {
       "type": "object",
-      "required": ["method", "met", "reference_body_weight_kg"],
+      "required": [
+        "method",
+        "met",
+        "reference_body_weight_kg"
+      ],
       "properties": {
-        "method": { "const": "MET" },
-        "met": { "type": "number", "minimum": 0 },
-        "reference_body_weight_kg": { "type": "number", "exclusiveMinimum": 0 }
+        "method": {
+          "const": "MET"
+        },
+        "met": {
+          "type": "number",
+          "minimum": 0
+        },
+        "reference_body_weight_kg": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
       },
       "additionalProperties": false
     },
@@ -108,10 +282,22 @@
         "estimated_calories_kcal"
       ],
       "properties": {
-        "exercise_count": { "type": "integer", "minimum": 1 },
-        "total_reps": { "type": "number", "minimum": 0 },
-        "volume_kg": { "type": "number", "minimum": 0 },
-        "estimated_calories_kcal": { "type": "number", "minimum": 0 }
+        "exercise_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "total_reps": {
+          "type": "number",
+          "minimum": 0
+        },
+        "volume_kg": {
+          "type": "number",
+          "minimum": 0
+        },
+        "estimated_calories_kcal": {
+          "type": "number",
+          "minimum": 0
+        }
       },
       "additionalProperties": false
     }
