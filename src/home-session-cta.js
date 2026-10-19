@@ -20,7 +20,7 @@ function updateHomeSessionCta() {
   if (!startWorkoutButton) return;
 
   const sessionActive = hasActiveSession();
-  const label = sessionActive ? "Reprendre la séance" : "Commencer";
+  const label = sessionActive ? "Reprendre la séance" : "Séance libre";
   const icon = startWorkoutButton.querySelector('[aria-hidden="true"]');
 
   if (icon) {
