@@ -1,5 +1,5 @@
 const DB_NAME = "herakles";
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 const PROFILE_ID = "local-user";
 
 export function openDatabase() {
@@ -20,6 +20,11 @@ export function openDatabase() {
 
       if (!db.objectStoreNames.contains("settings")) {
         db.createObjectStore("settings", { keyPath: "key" });
+      }
+
+      if (!db.objectStoreNames.contains("workout_plans")) {
+        const plans = db.createObjectStore("workout_plans", { keyPath: "id" });
+        plans.createIndex("kind", "kind", { unique: false });
       }
 
       if (!db.objectStoreNames.contains("measurements")) {
@@ -55,6 +60,10 @@ function runRequest(storeName, mode, action) {
       request.onerror = () => reject(request.error);
     }
 
+    for (const item of backup.workout_plans || []) {
+      transaction.objectStore("workout_plans").put(item);
+    }
+
     transaction.oncomplete = () => {
       db.close();
       resolve(result);
@@ -83,6 +92,25 @@ export async function saveSession(session) {
 
 export async function getAllSessions() {
   return runRequest("sessions", "readonly", (store) => store.getAll());
+}
+
+export async function getWorkoutPlans() {
+  return runRequest("workout_plans", "readonly", (store) => store.getAll());
+}
+
+export async function saveWorkoutPlan(plan) {
+  if (!plan || typeof plan.id !== "string" || !plan.id) throw new Error("Plan invalide");
+  await runRequest("workout_plans", "readwrite", (store) => store.put(plan));
+  return plan;
+}
+
+export async function deleteWorkoutPlan(id) {
+  if (typeof id !== "string" || !id) throw new Error("Identifiant de plan invalide");
+  return runRequest("workout_plans", "readwrite", (store) => store.delete(id));
+}
+
+export async function getWorkoutPlan(id) {
+  return runRequest("workout_plans", "readonly", (store) => store.get(id));
 }
 
 export async function deleteSession(id) {
@@ -136,11 +164,12 @@ export async function saveSetting(key, value) {
 }
 
 export async function exportAllData() {
-  const [profile, measurements, sessions, settings] = await Promise.all([
+  const [profile, measurements, sessions, settings, workoutPlans] = await Promise.all([
     getProfile(),
     getAllMeasurements(),
     getAllSessions(),
-    getAllSettings()
+    getAllSettings(),
+    getWorkoutPlans()
   ]);
 
   return {
@@ -150,7 +179,8 @@ export async function exportAllData() {
     profile,
     measurements,
     sessions,
-    settings
+    settings,
+    workout_plans: workoutPlans
   };
 }
 
@@ -181,6 +211,13 @@ function validateBackup(backup) {
     throw new Error("Historique de séances invalide");
   }
 
+  if (backup.workout_plans !== undefined && (
+    !Array.isArray(backup.workout_plans) ||
+    backup.workout_plans.some((item) => !isPlainRecord(item) || typeof item.id !== "string" || !item.id)
+  )) {
+    throw new Error("Programmes de sauvegarde invalides");
+  }
+
   if (backup.settings.some((item) => !isPlainRecord(item) || typeof item.key !== "string" || !item.key)) {
     throw new Error("Réglages de sauvegarde invalides");
   }
@@ -190,7 +227,7 @@ export async function importBackup(backup) {
   validateBackup(backup);
 
   const db = await openDatabase();
-  const stores = ["profile", "measurements", "sessions", "settings"];
+  const stores = ["profile", "measurements", "sessions", "settings", "workout_plans"];
 
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(stores, "readwrite");
@@ -220,7 +257,8 @@ export async function importBackup(backup) {
       resolve({
         measurements: backup.measurements.length,
         sessions: backup.sessions.length,
-        settings: backup.settings.length
+        settings: backup.settings.length,
+        workout_plans: (backup.workout_plans || []).length
       });
     };
     transaction.onerror = () => {
