@@ -129,11 +129,10 @@ export function initWorkoutPlanner({ showScreen, onStart, getActiveSession }) {
       input.type = "number"; input.min = String(min); input.step = String(step);
       input.inputMode = "decimal";
       input.value = String(planned[key] ?? (key === "sets" ? 4 : key === "reps" ? 10 : key === "rest_seconds" ? 120 : 0));
-      input.addEventListener("change", () => {
+      input.addEventListener("input", () => {
         const val = Number(input.value);
-        if (input.value !== "" && Number.isFinite(val) && val >= min) {
-          planned[key] = key === "sets" || key === "reps" ? Math.floor(val) : val;
-        }
+        planned[key] = input.value === "" || !Number.isFinite(val) || val < min
+          ? null : (key === "sets" || key === "reps" ? Math.floor(val) : val);
       });
       field.append(input); grid.append(field);
     }
@@ -241,7 +240,10 @@ export function initWorkoutPlanner({ showScreen, onStart, getActiveSession }) {
         if (item.exercise.type !== "cardio" &&
           (!Number.isInteger(Number(item.planned?.sets)) || Number(item.planned.sets) < 1 ||
            !Number.isInteger(Number(item.planned?.reps)) || Number(item.planned.reps) < 1 ||
-           Number(item.planned.nominal_load_kg) < 0 || Number(item.planned.rest_seconds) < 0)) {
+           !Number.isFinite(Number(item.planned.nominal_load_kg)) ||
+           item.planned.nominal_load_kg == null || Number(item.planned.nominal_load_kg) < 0 ||
+           !Number.isFinite(Number(item.planned.rest_seconds)) ||
+           item.planned.rest_seconds == null || Number(item.planned.rest_seconds) < 0)) {
           errorMessage("Vérifie les paramètres de musculation."); return;
         }
       }
