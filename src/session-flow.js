@@ -315,6 +315,7 @@ function showSessionRecap() {
 
   const list = recap.querySelector("#session-recap-exercise-list");
   list.replaceChildren();
+  recap.querySelector("#session-recap-title").textContent = session.name || "Séance terminée";
 
   session.exercises.forEach((exercise, index) => {
     const totalsForExercise = exerciseTotals(exercise);
@@ -332,6 +333,25 @@ function showSessionRecap() {
     row.append(title, detail);
     list.append(row);
   });
+
+  const missed = (session.planned_exercises || []).filter(
+    (item) => !(session.exercises || []).some((exercise) => exercise.plan_item_uid === item.uid)
+  );
+  if (missed.length) {
+    const missedTitle = document.createElement("h3");
+    missedTitle.textContent = "Prévus mais non réalisés";
+    list.append(missedTitle);
+    missed.forEach((item) => {
+      const row = document.createElement("article");
+      row.className = "session-recap-exercise";
+      const name = document.createElement("strong");
+      name.textContent = item.exercise?.name || "Exercice";
+      const detail = document.createElement("span");
+      detail.textContent = "Non réalisé · Exclu des statistiques";
+      row.append(name, detail);
+      list.append(row);
+    });
+  }
 
   ["home-screen", "exercise-flow", "workout-planner", "workout-overview", "session-panel", "exercise-recap", "rest-timer", "system-panel"].forEach((id) => {
     const screen = document.getElementById(id);
