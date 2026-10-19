@@ -118,6 +118,10 @@ Exemple :
 - information : `--color19` ;
 - ne pas utiliser les couleurs d'état comme décoration générale.
 
+## Illustrations des exercices
+
+Les images des exercices peuvent être définies avec une propriété facultative `image` dans le catalogue `EXERCISES`. Dans la liste des exercices, elles remplacent le symbole provisoire uniquement pour les entrées qui en possèdent une ; sinon, le symbole reste visible. Le cadre conserve son format rectangulaire actuel : l’image occupe la surface via `object-fit: cover`, reste alignée en haut via `object-position: center top` et son débordement est masqué. Ces images doivent être incluses dans le cache de la PWA pour le hors-ligne.
+
 ## Écrans d'entraînement
 
 Pendant une séance, afficher en priorité :
