@@ -915,6 +915,12 @@ function initHome() {
     });
 
     lastStats.textContent = "Recherche de la dernière séance…";
+    if (!planned) {
+      document.querySelector("#exercise-weight").value = "0";
+      document.querySelector("#exercise-sets").value = "4";
+      document.querySelector("#exercise-reps").value = "10";
+      document.querySelector("#exercise-rest").value = "120";
+    }
     if (planned) {
       document.querySelector("#exercise-weight").value = planned.nominal_load_kg ?? 0;
       document.querySelector("#exercise-sets").value = planned.sets ?? 4;
