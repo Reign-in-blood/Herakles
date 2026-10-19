@@ -833,8 +833,14 @@ function initHome() {
     });
   }
 
-  function showExerciseConfig(exercise) {
+  function showExerciseConfig(exercise, planned = null, plannedUid = null) {
     selectedExercise = exercise;
+    selectedPlannedUid = plannedUid;
+
+    if (exercise.type === "cardio" && plannedUid) {
+      preparePlannedCardio(exercise, planned, plannedUid);
+      return;
+    }
 
     if (exercise.type === "cardio") {
       exerciseStep = "session";
@@ -869,17 +875,38 @@ function initHome() {
       input.disabled = true;
     });
 
-    configSubmit.textContent = activeSession ? "Commencer l’exercice →" : "Commencer la séance →";
+    if (planned) {
+      document.querySelector("#exercise-weight").value = planned.nominal_load_kg ?? 0;
+      document.querySelector("#exercise-sets").value = planned.sets ?? 4;
+      document.querySelector("#exercise-reps").value = planned.reps ?? 10;
+      document.querySelector("#exercise-rest").value = planned.rest_seconds ?? 120;
+    } else {
+      const picked = exercise.id;
+      void getAllSessions().then((sessions) => {
+        if (selectedExercise?.id !== picked || selectedPlannedUid) return;
+        const last = sessions.filter((row) => row.started_at)
+          .sort((a, b) => Date.parse(b.started_at) - Date.parse(a.started_at))
+          .flatMap((row) => (row.exercises || []).filter((ex) => ex.id === picked))[0];
+        if (!last) return;
+        const first = last.sets?.[0];
+        document.querySelector("#exercise-weight").value = first?.nominal_load_kg ?? first?.load_kg ?? last.planned?.nominal_load_kg ?? 0;
+        document.querySelector("#exercise-sets").value = last.sets?.length || last.planned?.sets || 4;
+        document.querySelector("#exercise-reps").value = first?.reps || last.planned?.reps || 10;
+        document.querySelector("#exercise-rest").value = last.planned?.rest_seconds ?? 120;
+      }).catch((error) => console.warn("Previous exercise values unavailable", error));
+    }
+    configSubmit.textContent = "Commencer l’exercice →";
     flowMessage.textContent = "";
   }
 
   function resetExerciseFlow() {
     currentCategory = null;
     selectedExercise = null;
+    selectedPlannedUid = null;
     showCategories();
   }
 
-  function startExercise(draft) {
+  function startExercise(draft, planItemUid = null) {
     const now = new Date().toISOString();
 
     if (!activeSession) {
@@ -887,12 +914,16 @@ function initHome() {
         schema_version: 2,
         id: crypto.randomUUID?.() || `session-${Date.now()}`,
         started_at: now,
+        name: "Séance libre",
+        mode: "free",
+        planned_exercises: [],
         exercises: [],
         current_exercise: null
       };
     }
 
     activeSession.current_exercise = {
+      plan_item_uid: planItemUid,
       started_at: now,
       ended_at: null,
       exercise: draft.exercise,
@@ -1267,6 +1298,7 @@ function initHome() {
 
     activeSession.exercises.push({
       ...exerciseState.exercise,
+      plan_item_uid: exerciseState.plan_item_uid || null,
       started_at: exerciseState.started_at,
       ended_at: exerciseState.ended_at,
       duration_seconds: metrics.durationSeconds,
@@ -1295,7 +1327,7 @@ function initHome() {
     }
 
     resetExerciseFlow();
-    showScreen("exercise");
+    showSessionOverview();
   }
 
   document.querySelectorAll("[data-period]").forEach((button) => {
@@ -1320,14 +1352,24 @@ function initHome() {
       return;
     }
 
-    resetExerciseFlow();
-    showScreen("exercise");
+    if (activeSession) {
+      showSessionOverview();
+    } else {
+      resetExerciseFlow();
+      showScreen("exercise");
+    }
   });
 
   back.addEventListener("click", () => {
     if (!exerciseRecap.hidden && currentExercise()) {
       renderSession();
       showScreen("session");
+      return;
+    }
+
+    if (cardioPreparation && !sessionPanel.hidden) {
+      cardioPreparation = null;
+      showSessionOverview();
       return;
     }
 
@@ -1349,6 +1391,16 @@ function initHome() {
 
     if (!flow.hidden && exerciseStep === "list") {
       showCategories();
+      return;
+    }
+
+    if (!flow.hidden && activeSession) {
+      showSessionOverview();
+      return;
+    }
+
+    if (!overview.hidden && activeSession) {
+      showScreen("home");
       return;
     }
 
@@ -1396,7 +1448,7 @@ function initHome() {
       console.warn("Draft storage unavailable", error);
     }
 
-    startExercise(draft);
+    startExercise(draft, selectedPlannedUid);
   });
 
   saveExerciseButton.addEventListener("click", saveExerciseInSession);
@@ -1421,6 +1473,36 @@ function initHome() {
   }
 
   const restTimer = initRestTimer({ onFinish: completeRest });
+  planner = initWorkoutPlanner({
+    showScreen,
+    getActiveSession: () => activeSession,
+    onStart: (plan) => {
+      if (activeSession) return;
+      activeSession = {
+        schema_version: 2,
+        id: crypto.randomUUID?.() || `session-${Date.now()}`,
+        name: plan.name || "Séance programmée",
+        mode: "scheduled",
+        source_plan_id: plan.id,
+        planned_at: plan.scheduled_at,
+        planned_exercises: cloneWorkoutData(plan.items || []),
+        started_at: new Date().toISOString(),
+        exercises: [],
+        current_exercise: null
+      };
+      persistActiveSession();
+      showSessionOverview();
+    }
+  });
+
+  window.addEventListener("herakles:open-scheduled", async (event) => {
+    const { getWorkoutPlan } = await import("./storage.js");
+    const plan = await getWorkoutPlan(event.detail?.id);
+    if (plan) {
+      showScreen("planner");
+      await planner.showDetail(plan);
+    }
+  });
 
   try {
     const stored = JSON.parse(localStorage.getItem(ACTIVE_KEY));
@@ -1438,9 +1520,8 @@ function initHome() {
           renderSession();
           initialScreen = "session";
         }
-      } else if (activeSession.exercises.length) {
-        resetExerciseFlow();
-        initialScreen = "exercise";
+      } else {
+        initialScreen = "overview";
       }
     }
   } catch (error) {
@@ -1452,7 +1533,8 @@ function initHome() {
   window.setInterval(renderSessionClock, 1000);
   drawChart(7);
 
-  showScreen(initialScreen);
+  if (initialScreen === "overview") showSessionOverview();
+  else showScreen(initialScreen);
 }
 
 initHome();
