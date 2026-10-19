@@ -309,6 +309,17 @@ function initHome() {
 
   const categoryList = document.querySelector("#category-list");
   const exerciseList = document.querySelector("#exercise-list");
+  const searchExercise = document.createElement("input");
+  searchExercise.type = "search";
+  searchExercise.id = "exercise-search";
+  searchExercise.className = "workout-exercise-search";
+  searchExercise.placeholder = "Rechercher un exercice par nom";
+  searchExercise.setAttribute("aria-label", "Rechercher un exercice par nom");
+  searchExercise.hidden = true;
+  exerciseList.insertAdjacentElement("beforebegin", searchExercise);
+  searchExercise.addEventListener("input", () => {
+    if (exerciseStep === "list") showExerciseList();
+  });
   const freeButton = document.querySelector("#free-exercise-button");
   const config = document.querySelector("#exercise-config");
   const configSubmit = config.querySelector('button[type="submit"]');
@@ -742,6 +753,8 @@ function initHome() {
       : "Sélectionne une zone à travailler aujourd’hui.";
     categoryList.hidden = false;
     exerciseList.hidden = true;
+    searchExercise.hidden = true;
+    searchExercise.value = "";
     config.hidden = true;
     freeButton.hidden = true;
     flowMessage.textContent = "";
@@ -781,14 +794,17 @@ function initHome() {
       : "Choisis ton premier exercice.";
     categoryList.hidden = true;
     exerciseList.hidden = false;
+    searchExercise.hidden = false;
     config.hidden = true;
     freeButton.hidden = false;
     flowMessage.textContent = "";
     exerciseList.replaceChildren();
 
-    const items = currentCategory === "libre"
-      ? EXERCISES
-      : EXERCISES.filter((item) => item.categories.includes(currentCategory));
+    const query = searchExercise.value.trim().toLocaleLowerCase("fr-FR");
+    const items = query
+      ? EXERCISES.filter((item) => item.name.toLocaleLowerCase("fr-FR").includes(query))
+      : (currentCategory === "libre" ? EXERCISES
+        : EXERCISES.filter((item) => item.categories.includes(currentCategory)));
 
     items.forEach((exercise) => {
       const button = document.createElement("button");
@@ -863,6 +879,7 @@ function initHome() {
     flowIntro.textContent = "Ces valeurs sont des objectifs modifiables pendant l’exercice.";
     categoryList.hidden = true;
     exerciseList.hidden = true;
+    searchExercise.hidden = true;
     config.hidden = false;
     freeButton.hidden = true;
 
@@ -1387,7 +1404,8 @@ function initHome() {
     }
 
     if (!flow.hidden && exerciseStep === "config") {
-      showExerciseList();
+      if (selectedPlannedUid && activeSession) showSessionOverview();
+      else showExerciseList();
       return;
     }
 
