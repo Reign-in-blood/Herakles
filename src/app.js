@@ -380,6 +380,8 @@ function initHome() {
   }
 
   function showScreen(screen) {
+    const profileScreen = document.querySelector("#profile-screen");
+    if (profileScreen) profileScreen.hidden = true;
     home.hidden = screen !== "home";
     flow.hidden = screen !== "exercise";
     overview.hidden = screen !== "overview";
