@@ -134,3 +134,11 @@ Pendant une séance, afficher en priorité :
 6. actions rapides pour valider, corriger ou passer une série.
 
 Le chronomètre doit rester très visible et utilisable d'une seule main. Les informations essentielles doivent être compréhensibles d'un coup d'œil, y compris dans une salle sombre ou entre deux séries.
+
+## Refonte des séances — styles sur develop
+
+Le nouveau tunnel utilise `src/workout.css` et reprend strictement les variables de palette ci-dessus. Sur l'accueil, « Séance libre » et « Programmer une séance » sont deux actions distinctes. L'écran de programmation présente d'abord le programme entier avec des cartes individuelles et un démarrage explicite ; la liste des exercices de séance reste navigable dans n'importe quel ordre.
+
+Les cartes « à réaliser » doivent montrer les paramètres prévus ; les cartes « terminé » montrent uniquement les performances réellement enregistrées et utilisent les couleurs de succès (`--color14`/`--color15`). Un clic sur une carte terminée ouvre les résultats modifiables, jamais un nouveau chrono.
+
+Le chrono global fixe `#workout-global-clock` se place au-dessus des écrans, respecte `env(safe-area-inset-top)` et ne doit apparaître que pendant une séance active. L'application ajoute alors un espacement sous le bandeau pour éviter tout recouvrement. La navigation basse et les contrôles principaux doivent rester accessibles sur les petits téléphones. Ces comportements visuels restent à tester en conditions réelles.
