@@ -323,6 +323,10 @@ function initHome() {
   const freeButton = document.querySelector("#free-exercise-button");
   const config = document.querySelector("#exercise-config");
   const configSubmit = config.querySelector('button[type="submit"]');
+  const lastStats = document.createElement("p");
+  lastStats.className = "workout-muted";
+  lastStats.setAttribute("aria-live", "polite");
+  config.querySelector(".exercise-selected").insertAdjacentElement("afterend", lastStats);
   const flowTitle = document.querySelector("#exercise-flow-title");
   const flowIntro = document.querySelector("#exercise-flow-intro");
   const flowMessage = document.querySelector("#exercise-flow-message");
@@ -910,26 +914,39 @@ function initHome() {
       input.disabled = true;
     });
 
+    lastStats.textContent = "Recherche de la dernière séance…";
     if (planned) {
       document.querySelector("#exercise-weight").value = planned.nominal_load_kg ?? 0;
       document.querySelector("#exercise-sets").value = planned.sets ?? 4;
       document.querySelector("#exercise-reps").value = planned.reps ?? 10;
       document.querySelector("#exercise-rest").value = planned.rest_seconds ?? 120;
-    } else {
-      const picked = exercise.id;
-      void getAllSessions().then((sessions) => {
-        if (selectedExercise?.id !== picked || selectedPlannedUid) return;
-        const last = sessions.filter((row) => row.started_at)
-          .sort((a, b) => Date.parse(b.started_at) - Date.parse(a.started_at))
-          .flatMap((row) => (row.exercises || []).filter((ex) => ex.id === picked))[0];
-        if (!last) return;
-        const first = last.sets?.[0];
-        document.querySelector("#exercise-weight").value = first?.nominal_load_kg ?? first?.load_kg ?? last.planned?.nominal_load_kg ?? 0;
-        document.querySelector("#exercise-sets").value = last.sets?.length || last.planned?.sets || 4;
-        document.querySelector("#exercise-reps").value = first?.reps || last.planned?.reps || 10;
-        document.querySelector("#exercise-rest").value = last.planned?.rest_seconds ?? 120;
-      }).catch((error) => console.warn("Previous exercise values unavailable", error));
     }
+    const picked = exercise.id;
+    void getAllSessions().then((sessions) => {
+      if (selectedExercise?.id !== picked || config.hidden) return;
+      const last = sessions.filter((row) => row.started_at)
+        .sort((a, b) => Date.parse(b.started_at) - Date.parse(a.started_at))
+        .flatMap((row) => (row.exercises || []).filter((ex) => ex.id === picked))[0];
+      if (!last) {
+        lastStats.textContent = "Aucun historique pour cet exercice.";
+        return;
+      }
+      const first = last.sets?.[0];
+      const load = first?.nominal_load_kg ?? first?.load_kg ?? last.planned?.nominal_load_kg ?? 0;
+      const reps = first?.reps || last.planned?.reps || 10;
+      const sets = last.sets?.length || last.planned?.sets || 4;
+      const rest = last.planned?.rest_seconds ?? 120;
+      lastStats.textContent = `Dernière séance : ${sets} séries · ${reps} rép. · ${load} kg · repos ${rest} sec`;
+      if (!planned) {
+        document.querySelector("#exercise-weight").value = load;
+        document.querySelector("#exercise-sets").value = sets;
+        document.querySelector("#exercise-reps").value = reps;
+        document.querySelector("#exercise-rest").value = rest;
+      }
+    }).catch((error) => {
+      lastStats.textContent = "Historique indisponible.";
+      console.warn("Previous exercise values unavailable", error);
+    });
     configSubmit.textContent = "Commencer l’exercice →";
     flowMessage.textContent = "";
   }
