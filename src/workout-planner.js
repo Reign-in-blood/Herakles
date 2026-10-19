@@ -79,9 +79,27 @@ export function initWorkoutPlanner({ showScreen, onStart, getActiveSession }) {
       const label = element("div");
       label.append(element("strong", "", plan.name || "Séance favorite"),
         element("small", "", `${plan.items?.length || 0} exercice(s)`));
-      row.append(label, button("Reprogrammer", () => startEdit({
+      const actions = element("div", "workout-favorite-actions");
+      actions.append(button("Reprogrammer", () => startEdit({
         name: plan.name, scheduled_at: localInputDate(), items: cloneWorkoutData(plan.items || [])
       }), true));
+      actions.append(button("Renommer", async () => {
+        const name = window.prompt("Nom de la séance favorite :", plan.name || "");
+        if (name === null || !name.trim()) return;
+        try {
+          await saveWorkoutPlan({ ...plan, name: name.trim().slice(0, 100) });
+          await renderList();
+        } catch (error) {
+          console.error(error);
+          errorMessage("Impossible de renommer ce favori.");
+        }
+      }, true));
+      actions.append(button("Retirer", async () => {
+        if (!window.confirm("Retirer cette séance des favoris ? L'historique reste conservé.")) return;
+        try { await deleteWorkoutPlan(plan.id); await renderList(); }
+        catch (error) { console.error(error); errorMessage("Impossible de retirer ce favori."); }
+      }, true));
+      row.append(label, actions);
       group.append(row);
     }
     content.append(group);
