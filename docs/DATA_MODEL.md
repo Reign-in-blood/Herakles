@@ -56,6 +56,12 @@ Le thème actif est conservé séparément pendant la séance afin de pouvoir re
 
 Une fois la séance explicitement terminée, l'objet complet est enregistré dans IndexedDB. L'enregistrement final doit conserver l'ordre des exercices.
 
+## Refonte prévue — programme initial et exécution du jour (non implémentée)
+
+Décision validée pour les futures séances programmées : pendant la séance en cours, l'utilisateur pourra ajouter des exercices non prévus. **Ces ajouts appartiennent exclusivement à l'exécution du jour** ; ils apparaissent dans la séance réalisée et dans son historique lorsqu'ils ont été effectivement effectués, mais **ne modifient pas le programme initial** et ne se propagent pas aux autres séances planifiées ou à un éventuel programme réutilisable.
+
+La représentation exacte et la persistance des programmes programmés restent à définir avant modification du schéma ou de la base locale. Les séances enregistrées dans les formats existants restent inchangées.
+
 ## Principe important : données brutes d'abord
 
 Les données brutes et les données calculées sont séparées.
