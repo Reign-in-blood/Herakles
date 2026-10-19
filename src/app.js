@@ -1,4 +1,6 @@
-import { countSessions, openDatabase } from "./storage.js";
+import { countSessions, openDatabase, getAllSessions } from "./storage.js";
+import { initWorkoutPlanner } from "./workout-planner.js";
+import { cloneWorkoutData } from "./workout-plans.js";
 import { initNotificationControls } from "./notifications.js";
 import { CATEGORIES, EXERCISES, RESISTANCE_LABELS } from "./exercises.js";
 import { initRestTimer } from "./rest-timer.js";
@@ -244,6 +246,19 @@ function initHome() {
   const home = document.querySelector("#home-screen");
   const flow = document.querySelector("#exercise-flow");
   const sessionPanel = document.querySelector("#session-panel");
+  const overview = document.createElement("section");
+  overview.id = "workout-overview";
+  overview.className = "workout-overview";
+  overview.hidden = true;
+  flow.insertAdjacentElement("afterend", overview);
+
+  const globalClock = document.createElement("aside");
+  globalClock.id = "workout-global-clock";
+  globalClock.className = "workout-global-clock";
+  globalClock.hidden = true;
+  globalClock.setAttribute("aria-label", "Chronomètre global de la séance");
+  globalClock.innerHTML = '<span>Séance en cours</span><strong id="workout-clock-time">00:00:00</strong>';
+  document.body.append(globalClock);
 
   let exerciseRecap = document.querySelector("#exercise-recap");
   if (!exerciseRecap) {
@@ -323,6 +338,9 @@ function initHome() {
   let activeSession = null;
   let pendingSetIndex = null;
   let initialScreen = "home";
+  let selectedPlannedUid = null;
+  let cardioPreparation = null;
+  let planner = null;
 
   const chartData = {
     7: { labels: ["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"], values: [58,102,36,53,69,18,47] },
@@ -364,6 +382,8 @@ function initHome() {
   function showScreen(screen) {
     home.hidden = screen !== "home";
     flow.hidden = screen !== "exercise";
+    overview.hidden = screen !== "overview";
+    document.querySelector("#workout-planner")?.toggleAttribute("hidden", screen !== "planner");
     sessionPanel.hidden = screen !== "session";
     exerciseRecap.hidden = screen !== "recap";
     timer.hidden = screen !== "timer";
@@ -380,6 +400,8 @@ function initHome() {
     if (screen === "settings") navSettings.setAttribute("aria-current", "page");
     else navSettings.removeAttribute("aria-current");
 
+    document.body.classList.toggle("has-workout-clock", Boolean(activeSession));
+    globalClock.hidden = !activeSession;
     window.scrollTo(0, 0);
   }
 
@@ -478,9 +500,16 @@ function initHome() {
   }
 
   function renderSessionClock() {
-    if (!activeSession) return;
-
-    sessionElapsed.textContent = formatElapsed(Date.now() - new Date(activeSession.started_at).getTime());
+    if (!activeSession) {
+      globalClock.hidden = true;
+      document.body.classList.remove("has-workout-clock");
+      return;
+    }
+    globalClock.hidden = false;
+    document.body.classList.add("has-workout-clock");
+    const elapsed = formatElapsed(Date.now() - new Date(activeSession.started_at).getTime());
+    globalClock.querySelector("#workout-clock-time").textContent = elapsed;
+    sessionElapsed.textContent = elapsed;
 
     const exerciseState = currentExercise();
     const cardioElapsed = sessionSets.querySelector("#cardio-exercise-elapsed");
@@ -527,6 +556,178 @@ function initHome() {
       distanceKm,
       averageSpeedKmh
     };
+  }
+
+  function showSessionOverview() {
+    if (!activeSession || currentExercise()) return;
+    overview.replaceChildren();
+    const heading = document.createElement("header");
+    heading.className = "flow-heading";
+    const kicker = document.createElement("p");
+    kicker.className = "section-kicker";
+    kicker.textContent = "Séance en cours";
+    const title = document.createElement("h1");
+    title.textContent = activeSession.name || "Séance libre";
+    heading.append(kicker, title);
+    overview.append(heading);
+
+    const plannedItems = Array.isArray(activeSession.planned_exercises) ? activeSession.planned_exercises : [];
+    const completed = activeSession.exercises || [];
+    const count = document.createElement("p");
+    count.className = "workout-overview-progress";
+    count.textContent = plannedItems.length
+      ? `${completed.filter((ex) => ex.plan_item_uid).length} / ${plannedItems.length} exercices prévus réalisés · Ordre libre`
+      : `${completed.length} exercice(s) réalisé(s)`;
+    overview.append(count);
+
+    function exerciseCard(exercise, record) {
+      const card = document.createElement("button");
+      card.type = "button";
+      card.className = "workout-exercise-card" + (record ? " is-complete" : "");
+      const label = document.createElement("strong");
+      label.textContent = exercise.name || exercise.exercise?.name || "Exercice";
+      const state = document.createElement("span");
+      state.className = "workout-exercise-state";
+      state.textContent = record ? "Terminé · Voir / Corriger" : "À réaliser";
+      const details = document.createElement("small");
+      if (record) {
+        details.textContent = record.type === "cardio"
+          ? `${formatExerciseDuration(record.duration_seconds || 0)} · ${formatMetric(record.cardio?.distance_km)} km`
+          : `${record.sets?.length || 0} séries · ${record.total_reps || 0} rép. · ${formatMetric(record.volume_kg)} kg de volume`;
+        card.addEventListener("click", () => editFinishedExercise(activeSession.exercises.indexOf(record)));
+      } else {
+        const p = exercise.planned || {};
+        details.textContent = exercise.exercise.type === "cardio" ? "Cardio" :
+          `${p.sets} séries · ${p.reps} répétitions · ${p.nominal_load_kg} kg`;
+        card.addEventListener("click", () => openPlannedExercise(exercise));
+      }
+      card.append(label, state, details);
+      return card;
+    }
+
+    for (const item of plannedItems) {
+      const done = completed.find((exercise) => exercise.plan_item_uid === item.uid);
+      overview.append(exerciseCard(done || item, done));
+    }
+    for (const done of completed.filter((exercise) => !plannedItems.some((item) => item.uid === exercise.plan_item_uid))) {
+      overview.append(exerciseCard(done, done));
+    }
+    const add = document.createElement("button");
+    add.type = "button";
+    add.className = "button button-secondary";
+    add.textContent = "+ Ajouter un exercice";
+    add.addEventListener("click", () => { selectedPlannedUid = null; showCategories(); showScreen("exercise"); });
+    overview.append(add);
+    if (completed.length) {
+      const finish = document.createElement("button");
+      finish.type = "button";
+      finish.className = "button button-primary";
+      finish.textContent = "Terminer la séance";
+      finish.addEventListener("click", () => window.dispatchEvent(new Event("herakles:show-session-recap")));
+      overview.append(finish);
+    }
+    showScreen("overview");
+  }
+
+  function editFinishedExercise(index) {
+    const record = activeSession?.exercises?.[index];
+    if (!record) return;
+    overview.replaceChildren();
+    const heading = document.createElement("h1");
+    heading.textContent = `Résultats · ${record.name}`;
+    const info = document.createElement("p");
+    info.textContent = `Exercice terminé · ${formatExerciseDuration(record.duration_seconds || 0)}`;
+    overview.append(heading, info);
+    const form = document.createElement("form");
+    form.className = "workout-edit-form";
+    const fields = [];
+    if (record.type === "strength") {
+      (record.sets || []).forEach((set, index) => {
+        const grid = document.createElement("div");
+        grid.className = "workout-parameters";
+        const row = [];
+        for (const [label, key, step] of [["Répétitions", "reps", "1"], ["Charge (kg)", "nominal_load_kg", "0.5"]]) {
+          const wrap = document.createElement("label");
+          wrap.textContent = `Série ${index + 1} · ${label}`;
+          const input = document.createElement("input");
+          input.type = "number"; input.min = "0"; input.step = step; input.required = true;
+          input.value = String(set[key] ?? 0);
+          wrap.append(input); grid.append(wrap);
+          row.push({ key, input });
+        }
+        fields.push({ set, row });
+        form.append(grid);
+      });
+    } else {
+      const wrap = document.createElement("label");
+      wrap.textContent = "Distance parcourue (km)";
+      const distance = document.createElement("input");
+      distance.type = "number"; distance.min = "0.01"; distance.step = "0.01"; distance.required = true;
+      distance.value = String(record.cardio?.distance_km ?? "");
+      wrap.append(distance); form.append(wrap);
+      fields.push({ distance });
+    }
+    const submit = document.createElement("button");
+    submit.type = "submit"; submit.className = "button button-primary"; submit.textContent = "Enregistrer les corrections";
+    form.append(submit);
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      if (!form.reportValidity()) return;
+      for (const field of fields) {
+        if (field.set) {
+          for (const { key, input } of field.row) {
+            const val = Number(input.value);
+            if (!Number.isFinite(val) || val < 0) return;
+            field.set[key] = key === "reps" ? Math.floor(val) : val;
+          }
+        } else {
+          const distance = Number(field.distance.value);
+          if (!(distance > 0)) return;
+          record.cardio = { ...record.cardio, distance_km: distance,
+            average_speed_kmh: record.duration_seconds > 0
+              ? Math.round(distance / (record.duration_seconds / 3600) * 100) / 100 : 0 };
+        }
+      }
+      if (record.type === "strength") {
+        record.total_reps = record.sets.reduce((sum, set) => sum + Number(set.reps || 0), 0);
+        record.volume_kg = record.sets.reduce(
+          (sum, set) => sum + Number(set.reps || 0) * Number(set.nominal_load_kg || 0), 0);
+      }
+      persistActiveSession();
+      showSessionOverview();
+    });
+    overview.append(form);
+    const cancel = document.createElement("button");
+    cancel.type = "button"; cancel.className = "button button-secondary"; cancel.textContent = "← Retour à la liste";
+    cancel.addEventListener("click", showSessionOverview);
+    overview.append(cancel);
+    showScreen("overview");
+  }
+
+  function openPlannedExercise(item) {
+    const ex = EXERCISES.find((exercise) => exercise.id === item.exercise.id)
+      || { ...item.exercise, primary: item.exercise.primary_muscles || [], secondary: [] };
+    showExerciseConfig(ex, item.planned, item.uid);
+    if (ex.type !== "cardio") showScreen("exercise");
+  }
+
+  function preparePlannedCardio(exercise, planned, uid) {
+    cardioPreparation = { exercise, planned, uid };
+    sessionTitle.textContent = exercise.name;
+    sessionProgress.textContent = "Prêt à démarrer";
+    sessionSets.replaceChildren();
+    const label = document.createElement("p");
+    label.className = "cardio-live-time";
+    label.textContent = "00:00:00";
+    const start = document.createElement("button");
+    start.type = "button"; start.className = "button button-primary";
+    start.textContent = "Commencer l’exercice";
+    start.addEventListener("click", () => {
+      cardioPreparation = null;
+      startExercise(createExerciseDraft(exercise, planned || {}), uid);
+    });
+    sessionSets.append(label, start);
+    showScreen("session");
   }
 
   function showCategories() {
