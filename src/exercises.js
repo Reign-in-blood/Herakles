@@ -20,7 +20,7 @@ export const EXERCISES = [
   { id: "triceps-poulie", name: "Triceps à la poulie", categories: ["bras","haut"], primary: ["Triceps"], secondary: [], type: "strength", resistance: "cable" },
   { id: "developpe-couche", name: "Développé couché", categories: ["pectoraux","haut","bras"], primary: ["Pectoraux"], secondary: ["Triceps","Deltoïdes antérieurs"], type: "strength", resistance: "free_weight" },
   { id: "dips", name: "Dips", categories: ["pectoraux","bras","haut"], primary: ["Triceps","Pectoraux"], secondary: ["Deltoïdes antérieurs"], type: "strength", resistance: "bodyweight" },
-  { id: "tractions", name: "Tractions", categories: ["dos","bras","haut"], primary: ["Grand dorsal"], secondary: ["Biceps","Trapèzes"], type: "strength", resistance: "bodyweight" },
+  { id: "tractions", name: "Tractions", categories: ["dos","bras","haut"], primary: ["Grand dorsal"], secondary: ["Biceps","Trapèzes"], type: "strength", resistance: "bodyweight", image: "./assets/exercises/Traction.png" },
   { id: "rowing", name: "Rowing barre", categories: ["dos","haut"], primary: ["Grand dorsal","Rhomboïdes"], secondary: ["Biceps","Trapèzes"], type: "strength", resistance: "free_weight" }
 ];
 
