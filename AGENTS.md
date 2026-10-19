@@ -73,6 +73,10 @@ Ce choix est une règle de conception pour la refonte future. Le flux actuel ci-
 
 **Décision validée : ajout d'exercices imprévus pendant une séance programmée en cours.** La liste des exercices doit proposer « Ajouter un exercice » même après le démarrage de la séance. L'utilisateur choisit un exercice dans le catalogue, règle ses paramètres puis peut le réaliser avec un démarrage explicite via « Commencer ». La séance globale et son chronomètre continuent pendant cette navigation. Les exercices ajoutés doivent figurer dans la liste de la séance en cours et dans l'historique des exercices effectivement réalisés. **Décision validée : ces exercices ajoutés ne concernent que la séance du jour.** Ils sont conservés dans les données de l'exécution et son historique s'ils ont été réalisés ; ils ne modifient pas le programme initial, ni les autres séances programmées, ni un éventuel programme réutilisable.
 
+**Décision validée : retour automatique à la liste de la séance après validation d'un exercice.** Une fois les résultats de l'exercice conservés dans la séance active, afficher directement la liste des exercices prévus et ajoutés pendant l'entraînement ; l'utilisateur choisit librement la suite. Ne pas confondre cette liste avec la liste complète du catalogue d'exercices, ni revenir obligatoirement au choix d'une catégorie. Le chrono global continue. Ne pas perdre les résultats de l'exercice au moment de naviguer.
+
+**Piste UX à préciser : enrichir les cartes des exercices déjà réalisés avec leurs résultats de la séance du jour** (par exemple séries, répétitions, charges/volume, durée, ou métriques cardio selon le type). Les exercices encore à faire présentent leurs paramètres prévus. Les données affichées doivent venir de la séance en cours, sans inventer de statistiques et sans modifier les séances historiques. La quantité exacte d'informations et l'accès éventuel au récapitulatif détaillé restent à décider.
+
 Les détails de modification et de réordonnancement du programme restent à discuter avant implémentation.
 
 ## Flux produit de référence
