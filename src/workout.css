@@ -1,0 +1,50 @@
+/* Refonte du tunnel — composants autonomes conservant la palette officielle. */
+.hero-card:has(.hero-plan) { gap: 12px; min-height: 258px; }
+.hero-card .hero-plan { position: relative; z-index: 1; width: 100%; min-height: 48px; }
+.workout-planner, .workout-overview { display: grid; gap: 14px; margin-bottom: 28px; }
+.workout-planner-content, .workout-edit-form, .workout-edit-items,
+.workout-library-group, .workout-picker, .workout-overview { display: grid; gap: 12px; }
+.workout-planner h2, .workout-overview h2 { margin: 12px 0 2px; font-size: 1.1rem; color: var(--color10); }
+.workout-muted, .workout-overview-progress { color: var(--color8); font-size: .87rem; }
+.workout-library-card, .workout-plan-item, .workout-edit-item, .workout-exercise-card {
+  border: 1px solid var(--color5); border-radius: var(--radius2);
+  background: var(--color3); padding: 15px; min-width: 0;
+}
+.workout-library-card { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.workout-library-card > div, .workout-plan-item { display: grid; gap: 6px; }
+.workout-library-card strong, .workout-plan-item strong { overflow-wrap: anywhere; }
+.workout-library-card small, .workout-plan-item small { color: var(--color8); }
+.workout-library-card .button { width: auto; flex: 0 0 auto; padding-inline: 12px; }
+.workout-edit-form > label, .workout-picker { display: grid; gap: 7px; font-size: .88rem; }
+.workout-edit-form input, .workout-picker input, .workout-picker select {
+  min-width: 0; width: 100%; min-height: 44px; border: 1px solid var(--color5);
+  border-radius: var(--radius1); background: var(--color2); color: var(--color7);
+  padding: 9px 11px;
+}
+.workout-item-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.workout-item-heading .button { width: auto; padding-inline: 12px; }
+.workout-parameters { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; margin-top: 10px; }
+.workout-parameters label { display: grid; gap: 5px; color: var(--color8); font-size: .76rem; }
+.workout-parameters input { width: 100%; min-width: 0; }
+.workout-picker-results { display: grid; gap: 5px; max-height: 250px; overflow-y: auto; }
+.workout-picker-results .button { text-align: left; width: 100%; }
+.workout-order-buttons { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.workout-order-buttons .button { width: auto; }
+.workout-exercise-card { display: grid; gap: 6px; width: 100%; text-align: left; color: var(--color7); cursor: pointer; }
+.workout-exercise-card small { color: var(--color8); font-size: .8rem; }
+.workout-exercise-card.is-complete { border-color: var(--color14); background: var(--color15); }
+.workout-exercise-state { color: var(--color10); font-size: .75rem; }
+.workout-exercise-card.is-complete .workout-exercise-state { color: var(--color14); }
+.workout-global-clock { position: fixed; top: 0; left: 50%; transform: translateX(-50%);
+  width: min(100%,var(--content-width)); display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; z-index: 60; padding: calc(11px + env(safe-area-inset-top)) 18px 11px;
+  background: var(--color2); border-bottom: 1px solid var(--color10); box-shadow: 0 8px 18px #0007;
+}
+.workout-global-clock span { color: var(--color10); font-size: .82rem; font-weight: 750; }
+.workout-global-clock strong { color: var(--color7); font-size: 1.12rem; font-variant-numeric: tabular-nums; }
+.has-workout-clock .app-shell { padding-top: calc(78px + env(safe-area-inset-top)); }
+.agenda-favorite-button.is-favorite { color: var(--color16); border-color: var(--color16); }
+@media(max-width:380px) {
+  .workout-library-card { align-items: stretch; flex-direction: column; }
+  .workout-library-card .button { width: 100%; }
+}
