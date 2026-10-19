@@ -658,6 +658,22 @@ function initHome() {
       finish.textContent = "Terminer la séance";
       finish.addEventListener("click", () => window.dispatchEvent(new Event("herakles:show-session-recap")));
       overview.append(finish);
+    } else {
+      const cancel = document.createElement("button");
+      cancel.type = "button";
+      cancel.className = "button button-secondary";
+      cancel.textContent = "Annuler cette séance non commencée";
+      cancel.addEventListener("click", () => {
+        if (!window.confirm("Annuler cette séance ? La programmation sera conservée.")) return;
+        activeSession = null;
+        pendingSetIndex = null;
+        cardioPreparation = null;
+        localStorage.removeItem(ACTIVE_KEY);
+        localStorage.removeItem("herakles.sessionCategory.v1");
+        sessionStorage.removeItem("herakles.sessionDraft.v1");
+        showScreen("home");
+      });
+      overview.append(cancel);
     }
     showScreen("overview");
   }
