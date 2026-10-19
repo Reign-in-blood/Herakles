@@ -63,11 +63,11 @@ Herakles est une application personnelle de suivi d'entraînement, pensée d'abo
 
 Les entraînements sont **spontanés** : Herakles ne doit pas imposer de planification ou de programme préalable pour commencer une séance.
 
-## Refonte du tunnel de séance — décision produit validée, non implémentée
+## Refonte du tunnel de séance — première implémentation sur `develop`, tests utilisateurs à réaliser
 
 La refonte en discussion propose deux entrées depuis l'accueil : **Programmer une séance** et **Séance libre**. **Décision validée : à l'ouverture d'une séance programmée, l'utilisateur arrive d'abord sur une vue complète de cette séance (exercices et paramètres prévus), et non directement sur le premier exercice.** Le démarrage est une action distincte et explicite, via **Démarrer la séance** ; la simple consultation du programme ne lance ni séance active ni chronomètre global.
 
-Ce choix est une règle de conception pour la refonte future. Le flux actuel ci-dessous reste celui de l'application en production jusqu'à modification explicite du code.
+Ces règles sont intégrées dans une première version sur `develop`. La publication stable et la validation Android ne sont pas encore faites ; ne pas considérer ce chantier comme entièrement vérifié.
 
 **Décision validée : ordre d'exécution libre dans une séance programmée.** Après « Démarrer la séance », afficher la liste complète des exercices prévus, sans démarrer automatiquement le premier exercice. L'utilisateur peut sélectionner n'importe quel exercice, quelle que soit sa position dans le programme (par exemple si une machine est occupée). Un clic ouvre la fiche de l'exercice choisi, puis seul le bouton explicite « Commencer » lance cet exercice. À la fin de l'exercice, revenir à la liste pour choisir librement le suivant. Distinguer le démarrage du chrono global de la séance du démarrage propre à chaque exercice ; le premier est déclenché par « Démarrer la séance », le second par « Commencer » sur la fiche de l'exercice. Prévoir le suivi des exercices encore à réaliser et de ceux terminés, sans modifier implicitement l'ordre du programme.
 
@@ -79,13 +79,31 @@ Ce choix est une règle de conception pour la refonte future. Le flux actuel ci-
 
 **Décision validée : cliquer sur un exercice terminé ne doit jamais le redémarrer.** Depuis la liste des exercices de la séance active, une carte marquée « Terminé » ouvre uniquement le détail des résultats réellement enregistrés pour cette exécution. L'utilisateur peut y corriger les séries, répétitions et charges si nécessaire, puis enregistrer les corrections et revenir à la liste. Ne pas relancer l'exercice, ne pas créer de seconde exécution, et ne pas réinitialiser ses chronomètres. Les statistiques de la séance doivent refléter les valeurs corrigées, sans modifier le programme prévu ni les séances historiques. Les champs précis des autres types d'exercices (cardio) restent à cadrer.
 
-**Décision validée : programmation à partir d'une séance existante ou création entièrement nouvelle.** Le parcours « Programmer une séance » doit donner accès à une liste des séances de l'utilisateur qu'il peut choisir pour les reprogrammer, ainsi qu'à une option claire « Créer une nouvelle séance » permettant d'ajouter les exercices manuellement. Reprogrammer une séance existante reprend sa composition et ses paramètres dans **une nouvelle séance datée**, modifiable indépendamment. Ne pas écraser la séance source, ni les anciennes exécutions, ni propager les changements d'une exécution à toutes les autres. **Proposition UX retenue pour la refonte : marquer des séances historiques comme favorites.** Dans l'agenda, chaque séance terminée, y compris celles déjà présentes avant cette évolution, pourra être marquée ou démarquée individuellement avec une action en forme de cœur. L'état de favori est distinct de la séance réalisée, de ses résultats et de sa date ; plusieurs séances d'un même jour peuvent être favorites indépendamment. Dans « Programmer une séance », afficher les séances favorites réutilisables à côté de « Créer une nouvelle séance ». La sélection d'un favori doit créer une nouvelle occurrence indépendante, sans copier les timestamps ni les résultats comme séances déjà effectuées. Retirer un favori ne supprime ni l'historique d'origine ni les occurrences déjà programmées. **Décision validée : le favori est une copie indépendante des exercices et paramètres de la séance source**, créée lors de l'ajout aux favoris. Si la séance historique source est ultérieurement corrigée ou supprimée, le modèle favori reste disponible et inchangé ; une séance reprogrammée à partir de lui reçoit à son tour sa propre copie indépendante. L'historique et les statistiques ne sont jamais altérés par la mise en favori ou le retrait du favori. Retirer un favori le retire de « Mes séances favorites » sans supprimer l'historique ni les séances déjà programmées. Le format de persistance et la migration restent à concevoir avant implémentation.
+**Décision validée : programmation à partir d'une séance existante ou création entièrement nouvelle.** Le parcours « Programmer une séance » doit donner accès à une liste des séances de l'utilisateur qu'il peut choisir pour les reprogrammer, ainsi qu'à une option claire « Créer une nouvelle séance » permettant d'ajouter les exercices manuellement. Reprogrammer une séance existante reprend sa composition et ses paramètres dans **une nouvelle séance datée**, modifiable indépendamment. Ne pas écraser la séance source, ni les anciennes exécutions, ni propager les changements d'une exécution à toutes les autres. **Proposition UX retenue pour la refonte : marquer des séances historiques comme favorites.** Dans l'agenda, chaque séance terminée, y compris celles déjà présentes avant cette évolution, pourra être marquée ou démarquée individuellement avec une action en forme de cœur. L'état de favori est distinct de la séance réalisée, de ses résultats et de sa date ; plusieurs séances d'un même jour peuvent être favorites indépendamment. Dans « Programmer une séance », afficher les séances favorites réutilisables à côté de « Créer une nouvelle séance ». La sélection d'un favori doit créer une nouvelle occurrence indépendante, sans copier les timestamps ni les résultats comme séances déjà effectuées. Retirer un favori ne supprime ni l'historique d'origine ni les occurrences déjà programmées. **Décision validée : le favori est une copie indépendante des exercices et paramètres de la séance source**, créée lors de l'ajout aux favoris. Si la séance historique source est ultérieurement corrigée ou supprimée, le modèle favori reste disponible et inchangé ; une séance reprogrammée à partir de lui reçoit à son tour sa propre copie indépendante. L'historique et les statistiques ne sont jamais altérés par la mise en favori ou le retrait du favori. Retirer un favori le retire de « Mes séances favorites » sans supprimer l'historique ni les séances déjà programmées. Persistance implémentée : store IndexedDB `workout_plans` (v3), avec un modèle favori autonome et une occurrence programmée indépendante.
 
 **Décision validée : les séances doivent pouvoir recevoir un nom personnalisé.** Prévoir la saisie et la modification d'un intitulé de séance (par exemple « Dos / Biceps ») pour pouvoir l'identifier dans la programmation, les favoris et l'agenda. Garder les séances historiques déjà enregistrées accessibles sans exiger qu'elles aient immédiatement un nom. Le détail des règles de renommage des copies et des séances historiques reste à préciser.
 
-Les détails de modification et de réordonnancement du programme restent à discuter avant implémentation.
+### Flux de refonte actuellement codé sur `develop`
 
-## Flux produit de référence
+```text
+Accueil → Séance libre → catégorie / recherche → exercice → commencer
+Accueil → Programmer une séance → créer ou reprendre un favori
+      → nom + date/heure + exercices/réglages → sauvegarder
+      → vue complète du programme → Démarrer la séance
+Séance active → liste des exercices (ordre libre)
+      → choisir exercice → Commencer → terminer / valider
+      → retour à la liste (résultats accessibles pour correction)
+      → Ajouter un exercice facultatif → Terminer la séance
+      → récapitulatif global → enregistrement de la séance réellement effectuée
+```
+
+Les favoris peuvent être créés depuis toute séance historique dans l'agenda, y compris rétroactivement. Ils sont indépendants de la séance source. Les occurrences programmées apparaissent aussi dans l'agenda. Le bandeau chrono global est fixe pendant une séance active. La saisie du nom est accessible pendant la programmation, la séance active ou dans l'éditeur de l'agenda.
+
+**Points restant à vérifier sur Android** : reprises après fermeture, cardio programmé, navigation par les boutons de retour, gestion du chrono de repos, correction des exercices terminés, export/import avec anciens backups, planifications multiples et suppression de l'historique source d'un favori. Conserver les cas limites dans `TODO.md`.
+
+## Flux historique par thème — compatibilité de l'ancien tunnel
+
+### Détail du tunnel historique
 
 ```text
 Créer / commencer une séance
@@ -115,7 +133,7 @@ Règles importantes :
 
 - une **séance** est le conteneur global ;
 - une séance contient un ou plusieurs exercices réalisés successivement ;
-- le thème/groupe est choisi au début de la séance et reste le contexte de sélection jusqu'à la fin ;
+- dans l'ancien tunnel libre, le thème peut servir de contexte de sélection ; la liste de la séance programmée n'impose pas de thème ni d'ordre ;
 - après validation d'un exercice, revenir à la liste des exercices du thème actif, pas au choix des groupes ;
 - terminer un exercice ne termine pas la séance ;
 - seul **Terminer la séance** clôt la séance ;
@@ -234,7 +252,10 @@ Ne jamais réintroduire un merge silencieux dans l'action de restauration. Si un
 - `src/session.css` : styles de séance ;
 - `src/profile.css` : styles profil, poids et agenda ;
 - `src/app.js` : navigation et logique principale ;
-- `src/session-flow.js` : thème actif, reprise, fin de séance et récap global ;
+- `src/session-flow.js` : thème actif historique, reprise, fin de séance et récap global ;
+- `src/workout-planner.js` : écran de programmation, favoris et composition d'une séance ;
+- `src/workout-plans.js` : snapshots indépendants, listes favorites et séances programmées ;
+- `src/workout.css` : présentation des écrans de refonte et chrono fixe ;
 - `src/profile.js` : profil local, historique du poids, agenda, export/import ;
 - `src/agenda-session-actions.js` : modification et suppression ciblées de séances historiques ;
 - `src/home-dashboard.js` : statistiques réelles de l'accueil depuis IndexedDB ;
@@ -266,7 +287,7 @@ Le JSON est le format d'échange canonique. IndexedDB est le stockage applicatif
 
 ### IndexedDB actuel
 
-Version applicative IndexedDB : `2`.
+Version applicative IndexedDB : `3` (montée de version additive).
 
 Stores :
 
@@ -275,6 +296,7 @@ sessions
 profile
 settings
 measurements
+workout_plans
 ```
 
 Ne pas confondre `DB_VERSION` d'IndexedDB avec `session.schema_version`.
@@ -305,7 +327,8 @@ Les valeurs comme `volume_kg`, `exercise_volume_kg` ou `session_volume_kg` peuve
 ### Versionnement actuel des séances
 
 - `data/schema/session.schema.json` : format historique v1 ;
-- `data/schema/session-v2.schema.json` : format multi-exercices actuel ;
+- `data/schema/session-v2.schema.json` : format multi-exercices actuel, avec champs facultatifs de planification ;
+- `data/schema/workout-plan-v1.schema.json` : modèles favoris et occurrences programmées ;
 - ne jamais réécrire silencieusement les anciennes séances v1.
 
 ### Calories estimées
