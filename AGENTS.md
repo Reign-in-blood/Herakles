@@ -79,6 +79,8 @@ Ce choix est une règle de conception pour la refonte future. Le flux actuel ci-
 
 **Décision validée : cliquer sur un exercice terminé ne doit jamais le redémarrer.** Depuis la liste des exercices de la séance active, une carte marquée « Terminé » ouvre uniquement le détail des résultats réellement enregistrés pour cette exécution. L'utilisateur peut y corriger les séries, répétitions et charges si nécessaire, puis enregistrer les corrections et revenir à la liste. Ne pas relancer l'exercice, ne pas créer de seconde exécution, et ne pas réinitialiser ses chronomètres. Les statistiques de la séance doivent refléter les valeurs corrigées, sans modifier le programme prévu ni les séances historiques. Les champs précis des autres types d'exercices (cardio) restent à cadrer.
 
+**Décision validée : programmation à partir d'une séance existante ou création entièrement nouvelle.** Le parcours « Programmer une séance » doit donner accès à une liste des séances de l'utilisateur qu'il peut choisir pour les reprogrammer, ainsi qu'à une option claire « Créer une nouvelle séance » permettant d'ajouter les exercices manuellement. Reprogrammer une séance existante reprend sa composition et ses paramètres dans **une nouvelle séance datée**, modifiable indépendamment. Ne pas écraser la séance source, ni les anciennes exécutions, ni propager les changements d'une exécution à toutes les autres. L'organisation future d'une bibliothèque de modèles réutilisables, et l'inclusion directe des séances historiques dans la liste de sélection, restent à préciser avant la conception du stockage.
+
 Les détails de modification et de réordonnancement du programme restent à discuter avant implémentation.
 
 ## Flux produit de référence
