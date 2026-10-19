@@ -63,6 +63,12 @@ Herakles est une application personnelle de suivi d'entraînement, pensée d'abo
 
 Les entraînements sont **spontanés** : Herakles ne doit pas imposer de planification ou de programme préalable pour commencer une séance.
 
+## Refonte du tunnel de séance — décision produit validée, non implémentée
+
+La refonte en discussion propose deux entrées depuis l'accueil : **Programmer une séance** et **Séance libre**. **Décision validée : à l'ouverture d'une séance programmée, l'utilisateur arrive d'abord sur une vue complète de cette séance (exercices et paramètres prévus), et non directement sur le premier exercice.** Le démarrage est une action distincte et explicite, via **Démarrer la séance** ; la simple consultation du programme ne lance ni séance active ni chronomètre global.
+
+Ce choix est une règle de conception pour la refonte future. Le flux actuel ci-dessous reste celui de l'application en production jusqu'à modification explicite du code. Les détails de modification, réordonnancement et déroulement des exercices restent à discuter avant implémentation.
+
 ## Flux produit de référence
 
 ```text
