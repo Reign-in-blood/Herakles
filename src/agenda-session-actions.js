@@ -1,4 +1,5 @@
 import { deleteSession, saveSession } from "./storage.js";
+import { listFavorites, toggleFavorite } from "./workout-plans.js";
 
 function button(label, className) {
   const el = document.createElement("button");
@@ -42,6 +43,10 @@ function editor(session, onChanged, onClose) {
   const title = document.createElement("strong");
   title.textContent = "Modifier la séance";
   form.append(title);
+  const sessionName = field("Nom de la séance", session.name || "", "text");
+  sessionName.input.required = false;
+  sessionName.input.maxLength = 100;
+  form.append(sessionName.wrapper);
 
   const originalStart = Date.parse(session.started_at);
   const originalEnd = Date.parse(session.ended_at || "") || originalStart + Number(session.duration_seconds || 0) * 1000;
@@ -109,6 +114,7 @@ function editor(session, onChanged, onClose) {
     }
     const delta = startDate.getTime() - originalStart;
     const next = JSON.parse(JSON.stringify(session));
+    next.name = sessionName.input.value.trim().slice(0, 100);
     next.started_at = startDate.toISOString();
     next.ended_at = endDate.toISOString();
     next.duration_seconds = Math.floor((endDate - startDate) / 1000);
@@ -185,6 +191,33 @@ function editor(session, onChanged, onClose) {
 export function appendAgendaSessionActions(entry, session, onChanged) {
   const actions = document.createElement("div");
   actions.className = "agenda-session-actions";
+  const favorite = button("♡ Favoris", "button button-secondary agenda-favorite-button");
+  favorite.setAttribute("aria-label", "Ajouter cette séance aux favoris");
+  favorite.setAttribute("aria-pressed", "false");
+  const favoriteId = `favorite-${session.id}`;
+  void listFavorites().then((favorites) => {
+    if (!favorite.isConnected) return;
+    const isFavorite = favorites.some((item) => item.id === favoriteId);
+    favorite.textContent = isFavorite ? "♥ Favori" : "♡ Favoris";
+    favorite.setAttribute("aria-label", isFavorite ? "Retirer cette séance des favoris" : "Ajouter cette séance aux favoris");
+    favorite.setAttribute("aria-pressed", String(isFavorite));
+    favorite.classList.toggle("is-favorite", isFavorite);
+  }).catch((error) => console.warn("Favorites unavailable", error));
+  favorite.addEventListener("click", async () => {
+    favorite.disabled = true;
+    try {
+      const isFavorite = await toggleFavorite(session);
+      favorite.textContent = isFavorite ? "♥ Favori" : "♡ Favoris";
+      favorite.classList.toggle("is-favorite", isFavorite);
+      favorite.setAttribute("aria-pressed", String(isFavorite));
+      favorite.setAttribute("aria-label", isFavorite ? "Retirer cette séance des favoris" : "Ajouter cette séance aux favoris");
+    } catch (error) {
+      console.error("Favorite action failed", error);
+      window.alert("Impossible de modifier les favoris.");
+    } finally {
+      favorite.disabled = false;
+    }
+  });
   const modify = button("Modifier la séance", "button button-secondary");
   const remove = button("Supprimer la séance", "button agenda-button-danger");
   modify.addEventListener("click", () => {
@@ -216,6 +249,6 @@ export function appendAgendaSessionActions(entry, session, onChanged) {
       window.alert("Impossible de supprimer la séance.");
     }
   });
-  actions.append(modify, remove);
+  actions.append(favorite, modify, remove);
   entry.append(actions);
 }
