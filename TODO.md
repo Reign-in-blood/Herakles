@@ -1,5 +1,19 @@
 # TODO Herakles
 
+## Refonte du tunnel d'utilisation — conception à discuter avant développement
+
+Retours des premiers utilisateurs et essais réels : le choix immédiat d'une catégorie avant la création de séance rend le parcours actuel trop contraignant. Le nouveau fonctionnement reste **à cadrer et à valider** avant toute modification du workflow ou du modèle de données.
+
+- [ ] Repenser l'accueil avec deux entrées distinctes : **Programmer une séance** et **Séance libre**.
+- [ ] Définir le parcours de programmation : date, heure, ajout d'exercices (par catégorie ou recherche), réglages préremplis, sauvegarde d'une séance non commencée, puis démarrage ultérieur.
+- [ ] Définir le parcours libre : choix du premier exercice et de ses réglages, démarrage explicite de la séance, ajout successif d'exercices, puis fin et enregistrement.
+- [ ] Distinguer clairement séance programmée, séance en cours et séance terminée ; ne comptabiliser que les séances réalisées dans les statistiques.
+- [ ] Préciser les règles de reprise, de modification, d'annulation et de déplacement des séances programmées, et celles de modification du programme pendant une séance active.
+- [ ] **Ajouter une barre de recherche d'exercices par nom**, accessible dans le choix d'exercice.
+- [ ] **Afficher les données de la dernière séance pour chaque exercice** : charge/poids, répétitions, nombre de séries et durée des pauses lorsque disponibles ; réutiliser ces valeurs comme suggestions ou valeurs initiales à définir.
+- [ ] **Afficher un bandeau fixe en haut de la page pour le chrono global de la séance**, uniquement pendant une séance en cours, avec priorité d'affichage élevée (z-index) et respect de la zone sûre sur mobile.
+- [ ] **Étudier un choix des exercices par muscle plus précis** (par exemple quadriceps, grand dorsal), avec des illustrations appropriées, en complément ou en alternative aux catégories actuelles.
+
 ## Flux de séance — à fiabiliser
 
 - [x] Séance active multi-exercices avec retour au thème choisi.
