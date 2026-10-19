@@ -585,6 +585,20 @@ function initHome() {
     title.textContent = activeSession.name || "Séance libre";
     heading.append(kicker, title);
     overview.append(heading);
+    const rename = document.createElement("button");
+    rename.type = "button";
+    rename.className = "button button-secondary";
+    rename.textContent = "Renommer la séance";
+    rename.addEventListener("click", () => {
+      const name = window.prompt("Nom de la séance :", activeSession.name || "");
+      if (name === null) return;
+      const next = name.trim().slice(0, 100);
+      if (!next) return;
+      activeSession.name = next;
+      persistActiveSession();
+      showSessionOverview();
+    });
+    overview.append(rename);
 
     const plannedItems = Array.isArray(activeSession.planned_exercises) ? activeSession.planned_exercises : [];
     const completed = activeSession.exercises || [];
