@@ -56,13 +56,13 @@ Le thème actif est conservé séparément pendant la séance afin de pouvoir re
 
 Une fois la séance explicitement terminée, l'objet complet est enregistré dans IndexedDB. L'enregistrement final doit conserver l'ordre des exercices.
 
-## Refonte prévue — programme initial et exécution du jour (non implémentée)
+## Refonte en cours sur develop — programme et exécution du jour
 
 Décision validée pour les futures séances programmées : pendant la séance en cours, l'utilisateur pourra ajouter des exercices non prévus. **Ces ajouts appartiennent exclusivement à l'exécution du jour** ; ils apparaissent dans la séance réalisée et dans son historique lorsqu'ils ont été effectivement effectués, mais **ne modifient pas le programme initial** et ne se propagent pas aux autres séances planifiées ou à un éventuel programme réutilisable.
 
-La représentation exacte et la persistance des programmes programmés restent à définir avant modification du schéma ou de la base locale. Les séances enregistrées dans les formats existants restent inchangées.
+Les programmes sont persistés dans le store IndexedDB `workout_plans` (version de base 3). Les séances historiques restent dans `sessions` et conservent leur format existant ; les nouvelles séances v2 peuvent contenir des champs facultatifs `name`, `mode`, `source_plan_id`, `planned_at` et `planned_exercises` qui ne sont jamais comptés comme des exercices réalisés. Les données d'un exercice réalisé contiennent facultativement `plan_item_uid` pour relier le résultat au programme sans imposer l'ordre des exercices.
 
-## Refonte prévue — réutilisation des séances (décision validée, non implémentée)
+## Refonte sur develop — réutilisation des séances (code disponible, tests requis)
 
 La programmation offrira deux chemins : **choisir une séance de l'utilisateur pour la reprogrammer**, ou **créer une séance entièrement nouvelle**. La réutilisation doit produire une **nouvelle occurrence datée**, reprenant les exercices et leurs paramètres prévus comme point de départ. Modifier, réaliser ou compléter cette occurrence ne doit pas modifier la séance d'origine ni ses données historiques.
 
@@ -77,7 +77,15 @@ Piste de conception retenue : **les séances historiques pourront être marquée
 
 **Décision validée : les séances peuvent recevoir un nom personnalisé.** Ce nom doit pouvoir être conservé et affiché dans les interfaces adaptées (calendrier, programmation, favoris), tout en conservant l'accès aux séances historiques v1/v2 qui ne possèdent pas encore de nom. Les modalités précises du renommage et de la copie des intitulés restent à définir.
 
-Aucun nouveau store IndexedDB, schéma ou migration n'est encore validé ; préserver les données v1/v2 existantes et inclure les futurs objets pertinents dans l'export/import local.
+Le store `workout_plans` a été ajouté dans une migration additive `DB_VERSION = 3`, sans transformer `sessions`. Chaque enregistrement a `schema_version: 1`, `kind: "favorite" | "scheduled"`, `id`, `name`, `items[]` (chacun `uid`, `exercise`, `planned`), et `created_at`. Un favori conserve facultativement `source_session_id` comme trace de provenance ; il reste autonome et n'utilise pas cet identifiant pour se reconstruire. Une programmation conserve `scheduled_at` en ISO 8601. Chaque création de programmation et chaque démarrage créent une nouvelle copie indépendante des données.
+
+L'export JSON historique conserve `schema_version: 1` pour rétrocompatibilité et ajoute le champ optionnel `workout_plans`. Lors d'un import ancien sans ce champ, la restauration complète initialise `workout_plans` à vide. Le fichier `data/schema/workout-plan-v1.schema.json` décrit le format des nouveaux modèles. La compatibilité réelle doit encore être validée sur Android.
+
+## Cycle d'une séance programmée sur develop
+
+Une occurrence `kind: "scheduled"` n'est **pas** une séance achevée : elle ne contient ni `started_at` d'exécution, ni `summary` d'entraînement et elle ne compte pas dans le tableau de bord. Au clic sur « Démarrer la séance », son snapshot est copié dans la séance active `localStorage` : les exercices prévus deviennent `planned_exercises`, alors que `exercises[]` reste vide jusqu'à leur validation réelle. Le chrono global démarre à ce clic, tandis que chaque exercice n'obtient son propre `started_at` qu'après « Commencer l'exercice ».
+
+Lors de la clôture, seules les exécutions réelles constituent `exercises[]`. Les exercices prévus mais non réalisés restent visibles dans `planned_exercises` sans entrer dans les statistiques. La séance finale v2 est stockée dans `sessions` et l'occurrence `scheduled` correspondante est retirée des planifications. Les favoris restent autonomes et inchangés. Les séances libres suivent l'enregistrement historique v2 avec un `mode: "free"`.
 
 ## Principe important : données brutes d'abord
 
