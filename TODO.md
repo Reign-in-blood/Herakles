@@ -6,6 +6,7 @@ Retours des premiers utilisateurs et essais réels : le choix immédiat d'une ca
 
 - [ ] Repenser l'accueil avec deux entrées distinctes : **Programmer une séance** et **Séance libre**.
 - [ ] Définir le parcours de programmation : date, heure, ajout d'exercices (par catégorie ou recherche), réglages préremplis, sauvegarde d'une séance non commencée, puis démarrage ultérieur.
+- [x] **Décision UX : l'ouverture d'une séance programmée présente d'abord la vue complète du programme**, avec les exercices et leurs paramètres ; seul le bouton explicite « Démarrer la séance » active la séance et son chronomètre. Choix validé en conception, non encore développé.
 - [ ] Définir le parcours libre : choix du premier exercice et de ses réglages, démarrage explicite de la séance, ajout successif d'exercices, puis fin et enregistrement.
 - [ ] Distinguer clairement séance programmée, séance en cours et séance terminée ; ne comptabiliser que les séances réalisées dans les statistiques.
 - [ ] Préciser les règles de reprise, de modification, d'annulation et de déplacement des séances programmées, et celles de modification du programme pendant une séance active.
