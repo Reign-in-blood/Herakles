@@ -62,6 +62,17 @@ Décision validée pour les futures séances programmées : pendant la séance e
 
 La représentation exacte et la persistance des programmes programmés restent à définir avant modification du schéma ou de la base locale. Les séances enregistrées dans les formats existants restent inchangées.
 
+## Refonte prévue — réutilisation des séances (décision validée, non implémentée)
+
+La programmation offrira deux chemins : **choisir une séance de l'utilisateur pour la reprogrammer**, ou **créer une séance entièrement nouvelle**. La réutilisation doit produire une **nouvelle occurrence datée**, reprenant les exercices et leurs paramètres prévus comme point de départ. Modifier, réaliser ou compléter cette occurrence ne doit pas modifier la séance d'origine ni ses données historiques.
+
+Pour la conception future, distinguer conceptuellement :
+- **référence réutilisable** : composition et paramètres d'une séance que l'utilisateur souhaite pouvoir reproduire ;
+- **séance programmée** : occurrence personnelle à une date et heure, avec sa propre copie des exercices prévus ;
+- **séance effectuée** : données réelles (temps, séries, charges, cardio) de cette occurrence ou d'une séance libre, seules prises en compte dans les statistiques.
+
+Il reste à décider si les références réutilisables proviennent d'une bibliothèque explicite de programmes, des séances historiques terminées, ou des deux. Aucun nouveau store IndexedDB, schéma ou migration n'est encore validé ; préserver les données v1/v2 existantes et inclure les futurs objets pertinents dans l'export/import local.
+
 ## Principe important : données brutes d'abord
 
 Les données brutes et les données calculées sont séparées.
