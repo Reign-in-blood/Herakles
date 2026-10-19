@@ -628,9 +628,8 @@ backButton.addEventListener("click", (event) => {
   event.preventDefault();
   event.stopImmediatePropagation();
   hideRecap();
-  exerciseFlow.hidden = false;
   backButton.hidden = false;
-  openStoredCategory();
+  window.dispatchEvent(new Event("herakles:show-workout-overview"));
   window.scrollTo(0, 0);
 }, true);
 
