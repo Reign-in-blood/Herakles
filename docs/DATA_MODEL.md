@@ -71,7 +71,9 @@ Pour la conception future, distinguer conceptuellement :
 - **séance programmée** : occurrence personnelle à une date et heure, avec sa propre copie des exercices prévus ;
 - **séance effectuée** : données réelles (temps, séries, charges, cardio) de cette occurrence ou d'une séance libre, seules prises en compte dans les statistiques.
 
-Il reste à décider si les références réutilisables proviennent d'une bibliothèque explicite de programmes, des séances historiques terminées, ou des deux. Aucun nouveau store IndexedDB, schéma ou migration n'est encore validé ; préserver les données v1/v2 existantes et inclure les futurs objets pertinents dans l'export/import local.
+Piste de conception retenue : **les séances historiques pourront être marquées comme favorites, y compris rétroactivement depuis le calendrier**, chacune individuellement. Le parcours de programmation proposera la réutilisation de ces séances favorites ainsi que la création d'une nouvelle séance. Retirer un favori ne supprime jamais la séance source ou une occurrence déjà programmée. L'opération « Reprogrammer » doit produire une copie des exercices et des paramètres pertinents, pas une copie des mesures ou des timestamps réellement effectués.
+
+Il reste à décider si un favori correspond à une référence vers une séance historique ou à un modèle autonome créé depuis elle, ainsi que le comportement quand l'historique source change ou est supprimé. Aucun nouveau store IndexedDB, schéma ou migration n'est encore validé ; préserver les données v1/v2 existantes et inclure les futurs objets pertinents dans l'export/import local.
 
 ## Principe important : données brutes d'abord
 
