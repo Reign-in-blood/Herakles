@@ -1,4 +1,4 @@
-const CACHE_NAME = "herakles-shell-v30";
+const CACHE_NAME = "herakles-shell-v31";
 const APP_SHELL = [
   "./",
   "./index.html",
