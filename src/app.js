@@ -594,7 +594,17 @@ function initHome() {
 
       const visual = document.createElement("span");
       visual.className = "choice-visual";
-      visual.textContent = exercise.type === "cardio" ? "◷" : "Η";
+      if (exercise.image) {
+        visual.classList.add("has-image");
+        const image = document.createElement("img");
+        image.className = "choice-visual-image";
+        image.src = exercise.image;
+        image.alt = "";
+        image.loading = "lazy";
+        visual.append(image);
+      } else {
+        visual.textContent = exercise.type === "cardio" ? "◷" : "Η";
+      }
 
       const details = document.createElement("span");
       details.className = "choice-details";
