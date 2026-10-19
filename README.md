@@ -50,7 +50,11 @@ Le socle PWA et une grande partie du parcours d'entraînement sont en place :
 - stockage local IndexedDB ;
 - PWA hors ligne avec mécanisme de mise à jour automatique et recherche manuelle des mises à jour.
 
-La priorité actuelle reste la fiabilité des données locales et les tests réels de reprise de séance et de cardio sur téléphone.
+Une première refonte du parcours est disponible sur **develop** : deux entrées « Séance libre » et « Programmer une séance », création et modification des séances planifiées, réutilisation de favoris indépendants (cœur dans l'agenda), vue complète de séance, ordre d'exécution libre, ajout d'exercices imprévus, correction d'exercices terminés, noms personnalisés, recherche et propositions issues des dernières performances, bandeau de chrono global fixe.
+
+La base IndexedDB utilise désormais la version `3` avec un store additionnel `workout_plans` ; le store `sessions` conserve les séances réellement effectuées. L'export/import JSON comprend les programmes et accepte les anciens backups sans ce champ.
+
+**État** : implémentation initiale à vérifier sur Android et hors ligne. Ne pas fusionner vers `master` sans les tests de non-régression détaillés dans `TODO.md`.
 
 ## Structure
 
