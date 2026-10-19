@@ -1,34 +1,44 @@
 # TODO Herakles
 
-## Refonte du tunnel d'utilisation — conception à discuter avant développement
+## Refonte du tunnel d'utilisation — première implémentation sur develop, tests restants
 
-Retours des premiers utilisateurs et essais réels : le choix immédiat d'une catégorie avant la création de séance rend le parcours actuel trop contraignant. Le nouveau fonctionnement reste **à cadrer et à valider** avant toute modification du workflow ou du modèle de données.
+Retours des premiers utilisateurs et essais réels : le choix immédiat d'une catégorie avant la création de séance rend le parcours actuel trop contraignant. Une première implémentation est disponible sur **develop** : les éléments cochés indiquent du code écrit, **pas des tests Android validés**.
 
-- [ ] Repenser l'accueil avec deux entrées distinctes : **Programmer une séance** et **Séance libre**.
-- [ ] Définir le parcours de programmation : date, heure, ajout d'exercices (par catégorie ou recherche), réglages préremplis, sauvegarde d'une séance non commencée, puis démarrage ultérieur.
+- [x] Repenser l'accueil avec deux entrées distinctes : **Programmer une séance** et **Séance libre**.
+- [x] Définir le parcours de programmation : date, heure, ajout d'exercices (par catégorie ou recherche), réglages préremplis, sauvegarde d'une séance non commencée, puis démarrage ultérieur.
 - [x] **Décision UX : reprogrammer une séance existante ou créer une séance entièrement nouvelle.** « Programmer une séance » propose une liste des séances de l'utilisateur réutilisables et une action « Créer une nouvelle séance ». Le choix d'une séance existante crée une nouvelle occurrence datée avec les exercices et paramètres copiés, sans modifier la séance source. Choix validé en conception, non encore développé.
-- [ ] **Favoris de séances historiques : ajouter un bouton cœur à chaque séance dans le calendrier**, y compris les séances déjà enregistrées ; permettre d'ajouter ou retirer un favori sans modifier ses performances, ses statistiques ou son historique, et indépendamment des autres séances de la même date. Proposition UX retenue, non encore implémentée.
-- [ ] **Afficher « Mes séances favorites » dans « Programmer une séance »**, à côté de « Créer une nouvelle séance » ; sélectionner un favori copie les exercices et leurs paramètres vers une nouvelle séance datée, sans copier l'exécution passée (timestamps et résultats) ni altérer la source.
+- [x] **Favoris de séances historiques : ajouter un bouton cœur à chaque séance dans le calendrier**, y compris les séances déjà enregistrées ; permettre d'ajouter ou retirer un favori sans modifier ses performances, ses statistiques ou son historique, et indépendamment des autres séances de la même date. Proposition UX retenue, implémentée sur develop, à tester.
+- [x] **Afficher « Mes séances favorites » dans « Programmer une séance »**, à côté de « Créer une nouvelle séance » ; sélectionner un favori copie les exercices et leurs paramètres vers une nouvelle séance datée, sans copier l'exécution passée (timestamps et résultats) ni altérer la source.
 - [x] **Décision de données : enregistrer les favoris comme des copies indépendantes** des exercices et paramètres des séances historiques. La modification ou suppression ultérieure de la séance d'origine ne doit jamais altérer le favori ; chaque reprogrammation crée une nouvelle copie indépendante. Choix validé en conception, non encore développé.
-- [ ] **Permettre de donner un nom personnalisé aux séances** (création, programmation et renommage), par exemple « Dos / Biceps », puis afficher ce nom dans la liste des séances, les favoris, l'agenda et les détails. Prévoir un affichage compatible avec les anciennes séances sans nom ; préciser le comportement de renommage des copies.
+- [x] **Permettre de donner un nom personnalisé aux séances** (création, programmation et renommage), par exemple « Dos / Biceps », puis afficher ce nom dans la liste des séances, les favoris, l'agenda et les détails. Prévoir un affichage compatible avec les anciennes séances sans nom ; préciser le comportement de renommage des copies.
 - [ ] Préciser l'organisation de la bibliothèque et l'ajout éventuel de modèles créés directement ; définir comment retirer un favori sans supprimer l'historique ni les séances programmées.
-- [ ] Prévoir une persistance locale et un export/import des favoris respectant les historiques v1/v2 ; retirer un favori ne doit supprimer ni la séance d'origine, ni les copies déjà programmées.
-- [ ] Prévoir l'enregistrement local de modèles réutilisables et de séances programmées distinctes, leur export/import, ainsi que la préservation des anciennes séances lors de la migration de données.
+- [x] Prévoir une persistance locale et un export/import des favoris respectant les historiques v1/v2 ; retirer un favori ne doit supprimer ni la séance d'origine, ni les copies déjà programmées.
+- [x] Prévoir l'enregistrement local de modèles réutilisables et de séances programmées distinctes, leur export/import, ainsi que la préservation des anciennes séances lors de la migration de données.
 - [x] **Décision UX : l'ouverture d'une séance programmée présente d'abord la vue complète du programme**, avec les exercices et leurs paramètres ; seul le bouton explicite « Démarrer la séance » active la séance et son chronomètre. Choix validé en conception, non encore développé.
 - [x] **Décision UX : ordre libre d'exécution des exercices programmés.** Après « Démarrer la séance », présenter la liste des exercices, laisser l'utilisateur choisir n'importe lequel, ouvrir sa fiche puis lancer cet exercice uniquement au clic sur « Commencer ». Après un exercice terminé, revenir à la liste. La sélection n'impose pas l'ordre initial du programme ; le chrono global et le chrono de l'exercice ont des démarrages distincts. Décision validée en conception, non encore développée.
 - [x] **Décision UX : ajouter librement des exercices imprévus pendant une séance programmée déjà commencée.** Prévoir « Ajouter un exercice » dans la liste, sélectionner et configurer l'exercice, puis « Commencer » explicitement ; le chrono global continue. Choix validé en conception, non encore développé.
 - [x] **Décision de persistance : les exercices imprévus ajoutés restent propres à la séance du jour.** Les conserver dans l'exécution et l'historique des exercices effectués, sans modifier le programme d'origine ou d'autres séances. Choix validé en conception, non encore développé.
 - [x] **Décision UX : après validation et sauvegarde des résultats d'un exercice, revenir automatiquement à la liste des exercices de la séance**, sans imposer une nouvelle sélection de catégorie ; le chrono global continue. Choix validé en conception, non encore développé.
-- [ ] **Envisager les statistiques de la séance en cours directement dans les cartes des exercices terminés** : séries effectuées, répétitions, charges/volume et durée, ou statistiques cardio selon le type ; afficher les objectifs prévus pour les exercices à faire. Définir les données essentielles et l'accès éventuel aux détails avant implémentation.
+- [x] **Envisager les statistiques de la séance en cours directement dans les cartes des exercices terminés** : séries effectuées, répétitions, charges/volume et durée, ou statistiques cardio selon le type ; afficher les objectifs prévus pour les exercices à faire. Définir les données essentielles et l'accès éventuel aux détails avant implémentation.
 - [x] **Décision UX : cliquer sur un exercice déjà terminé ouvre ses résultats détaillés, jamais un redémarrage.** Autoriser la correction des séries, répétitions et charges enregistrées pendant la séance active ; après enregistrement des corrections, revenir à la liste sans créer une nouvelle exécution. Choix validé en conception, non encore développé.
-- [ ] Implémenter les corrections d'exercice terminé avec mise à jour des agrégats et préservation des données de la séance ; préciser la correction des métriques cardio et l'état visuel des cartes « à faire » / « terminé ».
-- [ ] Définir le parcours libre : choix du premier exercice et de ses réglages, démarrage explicite de la séance, ajout successif d'exercices, puis fin et enregistrement.
-- [ ] Distinguer clairement séance programmée, séance en cours et séance terminée ; ne comptabiliser que les séances réalisées dans les statistiques.
+- [x] Implémenter les corrections d'exercice terminé avec mise à jour des agrégats et préservation des données de la séance ; préciser la correction des métriques cardio et l'état visuel des cartes « à faire » / « terminé ».
+- [x] Définir le parcours libre : choix du premier exercice et de ses réglages, démarrage explicite de la séance, ajout successif d'exercices, puis fin et enregistrement.
+- [x] Distinguer clairement séance programmée, séance en cours et séance terminée ; ne comptabiliser que les séances réalisées dans les statistiques.
 - [ ] Préciser les règles de reprise, de modification, d'annulation et de déplacement des séances programmées, et celles de modification du programme pendant une séance active.
-- [ ] **Ajouter une barre de recherche d'exercices par nom**, accessible dans le choix d'exercice.
-- [ ] **Afficher les données de la dernière séance pour chaque exercice** : charge/poids, répétitions, nombre de séries et durée des pauses lorsque disponibles ; réutiliser ces valeurs comme suggestions ou valeurs initiales à définir.
-- [ ] **Afficher un bandeau fixe en haut de la page pour le chrono global de la séance**, uniquement pendant une séance en cours, avec priorité d'affichage élevée (z-index) et respect de la zone sûre sur mobile.
+- [x] **Ajouter une barre de recherche d'exercices par nom**, accessible dans le choix d'exercice.
+- [x] **Afficher les données de la dernière séance pour chaque exercice** : charge/poids, répétitions, nombre de séries et durée des pauses lorsque disponibles ; réutiliser ces valeurs comme suggestions ou valeurs initiales à définir.
+- [x] **Afficher un bandeau fixe en haut de la page pour le chrono global de la séance**, uniquement pendant une séance en cours, avec priorité d'affichage élevée (z-index) et respect de la zone sûre sur mobile.
 - [ ] **Étudier un choix des exercices par muscle plus précis** (par exemple quadriceps, grand dorsal), avec des illustrations appropriées, en complément ou en alternative aux catégories actuelles.
+
+## Vérifications obligatoires avant fusion vers master
+
+- [ ] Tester sur Android : créer une séance de zéro, la sauvegarder, l'ouvrir depuis l'agenda, la modifier, la démarrer et terminer partiellement le programme.
+- [ ] Tester le démarrage d'exercices programmés dans un ordre différent, l'ajout d'exercices imprévus et la correction d'un exercice déjà terminé sans le redémarrer.
+- [ ] Tester les parcours cardio libre/programmé, la récupération, la reprise après rechargement et l'arrêt/reprise du chronomètre global.
+- [ ] Tester les favoris d'anciennes séances, leur indépendance après modification/suppression de la séance source, et le retrait du favori depuis la bibliothèque.
+- [ ] Tester l'export/import d'un nouveau backup avec `workout_plans` et la restauration d'un ancien backup dépourvu de ce champ ; vérifier la conservation des données v1/v2.
+- [ ] Vérifier les interactions tactiles, le bandeau chrono fixe et les petits écrans Android ; corriger les régressions découvertes.
+- [ ] Vérifier la compatibilité des schémas et la cohérence des agrégats après correction d'un exercice terminé.
 
 ## Flux de séance — à fiabiliser
 
