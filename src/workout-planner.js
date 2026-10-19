@@ -45,7 +45,12 @@ export function initWorkoutPlanner({ showScreen, onStart, getActiveSession }) {
 
   async function open() {
     showScreen("planner");
-    await renderList();
+    try {
+      await renderList();
+    } catch (error) {
+      console.error("Workout planner unavailable", error);
+      errorMessage("Impossible d'ouvrir les séances programmées. Vérifie le stockage local.");
+    }
   }
 
   async function renderList() {
