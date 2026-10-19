@@ -397,6 +397,8 @@ function initHome() {
     flow.hidden = screen !== "exercise";
     overview.hidden = screen !== "overview";
     document.querySelector("#workout-planner")?.toggleAttribute("hidden", screen !== "planner");
+    const sessionRecap = document.querySelector("#session-recap");
+    if (sessionRecap) sessionRecap.hidden = true;
     sessionPanel.hidden = screen !== "session";
     exerciseRecap.hidden = screen !== "recap";
     timer.hidden = screen !== "timer";
@@ -1514,6 +1516,8 @@ function initHome() {
       showSessionOverview();
     }
   });
+
+  window.addEventListener("herakles:show-workout-overview", showSessionOverview);
 
   window.addEventListener("herakles:open-scheduled", async (event) => {
     const { getWorkoutPlan } = await import("./storage.js");
