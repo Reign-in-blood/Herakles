@@ -60,10 +60,6 @@ function runRequest(storeName, mode, action) {
       request.onerror = () => reject(request.error);
     }
 
-    for (const item of backup.workout_plans || []) {
-      transaction.objectStore("workout_plans").put(item);
-    }
-
     transaction.oncomplete = () => {
       db.close();
       resolve(result);
@@ -250,6 +246,10 @@ export async function importBackup(backup) {
 
     for (const item of backup.settings) {
       transaction.objectStore("settings").put(item);
+    }
+
+    for (const item of backup.workout_plans || []) {
+      transaction.objectStore("workout_plans").put(item);
     }
 
     transaction.oncomplete = () => {
