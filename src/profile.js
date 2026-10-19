@@ -509,7 +509,8 @@ function renderAgenda() {
     button.className = `agenda-day${sessions.length ? " has-session" : ""}${key === localDateKey() ? " is-today" : ""}`;
     button.innerHTML = `<span>${day}</span>${sessions.length ? `<small>${sessions.length}</small>` : ""}`;
     button.setAttribute("aria-label", sessions.length ? `${day}, ${sessions.length} séance${sessions.length > 1 ? "s" : ""}` : String(day));
-    button.addEventListener("click", () => renderAgendaDayDetails(key, sessions));
+    button.addEventListener("click", () => renderAgendaDayDetails(key, sessionsCache.filter((session) =>
+      session.started_at && localDateKey(session.started_at) === key)));
     grid.append(button);
   }
 }
