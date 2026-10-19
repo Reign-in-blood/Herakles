@@ -8,6 +8,7 @@ import {
   saveProfile
 } from "./storage.js";
 import { appendAgendaSessionActions } from "./agenda-session-actions.js";
+import { listScheduled } from "./workout-plans.js";
 
 const profileButton = document.querySelector(".profile-button");
 const appShell = document.querySelector(".app-shell");
@@ -34,6 +35,7 @@ const GOAL_LABELS = {
 let profileScreen = null;
 let currentCalendarDate = new Date();
 let sessionsCache = [];
+let plannedCache = [];
 let measurementsCache = [];
 let profileCache = null;
 
@@ -406,7 +408,9 @@ function renderAgendaDayDetails(dateKey, sessions) {
   title.textContent = new Intl.DateTimeFormat("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(date);
   root.append(title);
 
-  if (!sessions.length) {
+  const planned = plannedCache.filter((plan) =>
+    plan.scheduled_at && localDateKey(plan.scheduled_at) === dateKey);
+  if (!sessions.length && !planned.length) {
     const empty = document.createElement("p");
     empty.textContent = "Aucune séance enregistrée ce jour-là.";
     root.append(empty);
@@ -419,7 +423,7 @@ function renderAgendaDayDetails(dateKey, sessions) {
     const item = document.createElement("article");
     item.className = "agenda-session-item";
     const name = document.createElement("strong");
-    name.textContent = session.theme_id ? `Séance · ${session.theme_id}` : "Séance";
+    name.textContent = session.name || (session.theme_id ? `Séance · ${session.theme_id}` : "Séance");
     const detail = document.createElement("span");
     const exerciseCount = session.summary?.exercise_count ?? session.exercises?.length ?? 0;
     detail.textContent = `${exerciseCount} exercice${exerciseCount > 1 ? "s" : ""} · ${formatDuration(session.duration_seconds)}`;
@@ -428,10 +432,31 @@ function renderAgendaDayDetails(dateKey, sessions) {
     appendAgendaSessionActions(entry, session, refreshAgendaAfterChange);
     root.append(entry);
   });
+
+  planned.forEach((plan) => {
+    const entry = document.createElement("div");
+    entry.className = "agenda-session-entry";
+    const item = document.createElement("article");
+    item.className = "agenda-session-item";
+    const title = document.createElement("strong");
+    title.textContent = plan.name || "Séance programmée";
+    const detail = document.createElement("span");
+    detail.textContent = `Programmée · ${(plan.items || []).length} exercices · ${new Date(plan.scheduled_at).toLocaleTimeString("fr-FR", {hour:"2-digit", minute:"2-digit"})}`;
+    item.append(title, detail);
+    const open = document.createElement("button");
+    open.className = "button button-secondary";
+    open.type = "button";
+    open.textContent = "Ouvrir la programmation";
+    open.addEventListener("click", () => {
+      window.dispatchEvent(new CustomEvent("herakles:open-scheduled", { detail: { id: plan.id } }));
+    });
+    entry.append(item, open);
+    root.append(entry);
+  });
 }
 
 async function refreshAgendaAfterChange(startedAt) {
-  sessionsCache = await getAllSessions();
+  [sessionsCache, plannedCache] = await Promise.all([getAllSessions(), listScheduled()]);
   const date = new Date(startedAt);
   currentCalendarDate = new Date(date.getFullYear(), date.getMonth(), 1);
   renderAgenda();
@@ -457,6 +482,12 @@ function renderAgenda() {
     const key = localDateKey(session.started_at);
     if (!sessionsByDay.has(key)) sessionsByDay.set(key, []);
     sessionsByDay.get(key).push(session);
+  });
+  plannedCache.forEach((plan) => {
+    if (!plan.scheduled_at) return;
+    const key = localDateKey(plan.scheduled_at);
+    if (!sessionsByDay.has(key)) sessionsByDay.set(key, []);
+    sessionsByDay.get(key).push(plan);
   });
 
   const firstDay = new Date(year, month, 1);
@@ -484,10 +515,11 @@ function renderAgenda() {
 }
 
 async function loadProfileData() {
-  [profileCache, measurementsCache, sessionsCache] = await Promise.all([
+  [profileCache, measurementsCache, sessionsCache, plannedCache] = await Promise.all([
     getProfile(),
     getAllMeasurements(),
-    getAllSessions()
+    getAllSessions(),
+    listScheduled()
   ]);
   fillProfileForm();
   renderWeightChart();
@@ -495,7 +527,7 @@ async function loadProfileData() {
 }
 
 function hideKnownScreens() {
-  ["home-screen", "exercise-flow", "session-panel", "exercise-recap", "rest-timer", "system-panel", "session-recap"].forEach((id) => {
+  ["home-screen", "exercise-flow", "workout-planner", "workout-overview", "session-panel", "exercise-recap", "rest-timer", "system-panel", "session-recap"].forEach((id) => {
     const screen = document.getElementById(id);
     if (screen) screen.hidden = true;
   });
